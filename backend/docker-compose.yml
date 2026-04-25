@@ -1,0 +1,101 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: lumenshake-db
+    environment:
+      POSTGRES_DB: lumenshake
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - lumenshake-network
+
+  # Backend API
+  backend:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    container_name: lumenshake-backend
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DATABASE_URL: postgresql://postgres:${DB_PASSWORD:-postgres}@postgres:5432/lumenshake
+      STELLAR_NETWORK: ${STELLAR_NETWORK:-mainnet}
+      STELLAR_RPC_URL: ${STELLAR_RPC_URL}
+      CONTRACT_ID: ${CONTRACT_ID}
+      HOME_DOMAIN: ${HOME_DOMAIN}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: 24h
+      MONEYGRAM_API_KEY: ${MONEYGRAM_API_KEY}
+      MONEYGRAM_API_SECRET: ${MONEYGRAM_API_SECRET}
+      PIN_ENCRYPTION_KEY: ${PIN_ENCRYPTION_KEY}
+      ANCHOR_URL: ${ANCHOR_URL}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    ports:
+      - "4000:4000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - lumenshake-network
+
+  # Background Worker
+  worker:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    container_name: lumenshake-worker
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://postgres:${DB_PASSWORD:-postgres}@postgres:5432/lumenshake
+      STELLAR_NETWORK: ${STELLAR_NETWORK:-mainnet}
+      STELLAR_RPC_URL: ${STELLAR_RPC_URL}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    command: ["node", "src/worker.js"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - lumenshake-network
+
+  # Nginx Reverse Proxy (Optional - for production)
+  nginx:
+    image: nginx:alpine
+    container_name: lumenshake-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - lumenshake-network
+
+volumes:
+  postgres_data:
+
+networks:
+  lumenshake-network:
+    driver: bridge

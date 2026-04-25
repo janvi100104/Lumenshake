@@ -1,0 +1,1 @@
+/home/janviunix/JANVI/project/Lumenshake/contracts/payroll_contract/target/wasm32-unknown-unknown/release/payroll_contract.wasm: /home/janviunix/JANVI/project/Lumenshake/contracts/payroll_contract/src/lib.rs
