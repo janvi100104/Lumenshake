@@ -53,3 +53,6 @@ Backend/prisma/migrations/
 
 # Debug
 debug.log
+
+# Documentation (local only, not for publishing)
+docs/
