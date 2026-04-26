@@ -1,15 +1,15 @@
-# TokenPay - Stellar-Powered Cross-Border Payroll System
+# Lumenshake - Stellar-Powered Cross-Border Payroll System
 
 > Employers pay workers in USDC on Stellar, workers cash out at any MoneyGram location—no bank account needed.
 
 [![Demo](https://img.shields.io/badge/Demo-Live-brightgreen)](http://localhost:3000)
 [![Network](https://img.shields.io/badge/Network-Stellar%20Testnet-blue)](https://stellar.expert/explorer/testnet/contract/CBHNF7LHWNUWW77T2EVGMXOPJ5HHQXU3JNMS5MX5PI5XRHX4WGM46V7Z)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
-[![Feedback](https://img.shields.io/badge/Feedback-Share%20Thoughts-orange)](https://forms.gle/yK9LLnUdG4oqkcqF6)
+[![Feedback](https://img.shields.io/badge/Feedback-Share%20Thoughts-orange)](https://forms.gle/4h4EiXHue2EvKZt59)
 
-## 🎯 What is TokenPay?
+## 🎯 What is Lumenshake?
 
-TokenPay is a decentralized payroll system built on Stellar's Soroban smart contract platform that enables:
+Lumenshake is a decentralized payroll system built on Stellar's Soroban smart contract platform that enables:
 - **Cross-border payments** with USDC on Stellar
 - **Automated payroll distribution** via smart contracts
 - **Bankless cash-out** through MoneyGram's 400K+ locations
@@ -264,9 +264,15 @@ See [DEMO_GUIDE.md](DEMO_GUIDE.md) for complete step-by-step instructions with:
 
 ## 💬 Share Your Feedback
 
-We'd love to hear your thoughts on TokenPay! Your feedback helps us improve the platform.
+We'd love to hear your thoughts on Lumenshake! Your feedback helps us improve the platform.
 
-📝 **[Share Feedback via Google Form](https://forms.gle/yK9LLnUdG4oqkcqF6)**
+### 📝 Feedback Form
+Share your thoughts, suggestions, and report issues:
+**[📊 Submit Feedback via Google Form](https://forms.gle/4h4EiXHue2EvKZt59)**
+
+### 📈 View Feedback Data
+See all collected feedback and responses:
+**[📄 View Feedback Spreadsheet](https://docs.google.com/spreadsheets/d/1MW2XCGREFD10hfBYo1vDOeq6A2rcvsNM12O45H7A4fs/edit?resourcekey=&gid=412778729#gid=412778729)**
 
 Your input on:
 - User experience
@@ -323,7 +329,8 @@ MIT License - see [LICENSE](LICENSE) file for details
 
 - **Project Repository**: [github.com/janvi100104/Lumenshake](https://github.com/janvi100104/Lumenshake)
 - **Stellar Discord**: https://discord.gg/stellardev
-- **Feedback Form**: https://forms.gle/yK9LLnUdG4oqkcqF6
+- **Feedback Form**: https://forms.gle/4h4EiXHue2EvKZt59
+- **Feedback Spreadsheet**: https://docs.google.com/spreadsheets/d/1MW2XCGREFD10hfBYo1vDOeq6A2rcvsNM12O45H7A4fs/edit
 - **Email**: Create an issue on GitHub
 
 ---
