@@ -23,7 +23,7 @@ interface SEP24Transaction {
 
 export default function SEP24Dashboard() {
   const toast = useToast();
-  const { account } = useWallet();
+  const { address } = useWallet();
   
   const [activeTab, setActiveTab] = useState<'deposit' | 'withdraw'>('deposit');
   const [assetCode, setAssetCode] = useState('USDC');
@@ -36,10 +36,10 @@ export default function SEP24Dashboard() {
 
   // Load transactions on mount
   useEffect(() => {
-    if (account) {
+    if (address) {
       loadTransactions();
     }
-  }, [account]);
+  }, [address]);
 
   const loadTransactions = async () => {
     try {
@@ -64,7 +64,7 @@ export default function SEP24Dashboard() {
   const handleDeposit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!account) {
+    if (!address) {
       toast.error('Wallet not connected', 'Please connect your wallet first');
       return;
     }
@@ -130,7 +130,7 @@ export default function SEP24Dashboard() {
   const handleWithdraw = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!account) {
+    if (!address) {
       toast.error('Wallet not connected', 'Please connect your wallet first');
       return;
     }
@@ -317,7 +317,7 @@ export default function SEP24Dashboard() {
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={loading || !account}
+              disabled={loading || !address}
               className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium py-3 rounded-lg transition disabled:cursor-not-allowed"
             >
               {loading ? (
@@ -335,7 +335,7 @@ export default function SEP24Dashboard() {
               )}
             </button>
 
-            {!account && (
+            {!address && (
               <p className="text-sm text-center text-red-600">
                 Please connect your wallet to continue
               </p>

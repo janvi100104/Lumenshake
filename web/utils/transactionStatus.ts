@@ -1,4 +1,4 @@
-import { SorobanRpc } from '@stellar/stellar-sdk';
+import { rpc } from '@stellar/stellar-sdk';
 
 export type TransactionStatus = 'pending' | 'success' | 'failed' | 'not_found';
 
@@ -7,7 +7,7 @@ export type TransactionInfo = {
   txHash: string;
   ledger?: number;
   createdAt?: string;
-  resultMetaXdr?: string;
+  resultMetaXdr?: any;
   error?: string;
 };
 
@@ -19,31 +19,31 @@ export const getTransactionStatus = async (
   rpcUrl: string = 'https://soroban-testnet.stellar.org'
 ): Promise<TransactionInfo> => {
   try {
-    const server = new SorobanRpc.Server(rpcUrl);
+    const server = new rpc.Server(rpcUrl);
     
     // Get transaction details
     const txResponse = await server.getTransaction(txHash);
     
     switch (txResponse.status) {
-      case SorobanRpc.Api.GetTransactionStatus.SUCCESS:
+      case rpc.Api.GetTransactionStatus.SUCCESS:
         return {
           status: 'success',
           txHash,
           ledger: txResponse.ledger,
-          createdAt: txResponse.createdAt?.toISOString(),
+          createdAt: txResponse.createdAt ? new Date(txResponse.createdAt * 1000).toISOString() : undefined,
           resultMetaXdr: txResponse.resultMetaXdr,
         };
       
-      case SorobanRpc.Api.GetTransactionStatus.FAILED:
+      case rpc.Api.GetTransactionStatus.FAILED:
         return {
           status: 'failed',
           txHash,
           ledger: txResponse.ledger,
-          createdAt: txResponse.createdAt?.toISOString(),
-          error: txResponse.resultXdr || 'Transaction failed',
+          createdAt: txResponse.createdAt ? new Date(txResponse.createdAt * 1000).toISOString() : undefined,
+          error: txResponse.resultXdr ? String(txResponse.resultXdr) : 'Transaction failed',
         };
       
-      case SorobanRpc.Api.GetTransactionStatus.NOT_FOUND:
+      case rpc.Api.GetTransactionStatus.NOT_FOUND:
       default:
         return {
           status: 'pending',

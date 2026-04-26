@@ -35,11 +35,12 @@ interface Location {
 }
 
 export default function CashOutDashboard() {
-  const { account: walletAddress, isConnected, connectWallet } = useWallet();
+  const { address: walletAddress, isConnected: isConnectedState, connectWallet } = useWallet();
   const toast = useToast();
   
   const [balance, setBalance] = useState<string>('0');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [step, setStep] = useState(1); // 1: Amount, 2: Receiver, 3: Location, 4: Confirm
   const [exchangeRate, setExchangeRate] = useState<ExchangeRate | null>(null);
   const [locations, setLocations] = useState<Location[]>([]);
@@ -74,10 +75,10 @@ export default function CashOutDashboard() {
 
   // Fetch user's balance when connected
   useEffect(() => {
-    if (isConnected) {
+    if (isConnectedState) {
       fetchBalance();
     }
-  }, [isConnected]);
+  }, [isConnectedState]);
 
   const fetchBalance = async () => {
     // TODO: Fetch actual USDC balance from contract
@@ -151,7 +152,7 @@ export default function CashOutDashboard() {
       return;
     }
 
-    if (!isConnected) {
+    if (!isConnectedState) {
       toast.error('Wallet not connected', 'Please connect your wallet first');
       return;
     }
@@ -560,7 +561,7 @@ export default function CashOutDashboard() {
     </div>
   );
 
-  if (!isConnected) {
+  if (!isConnectedState) {
     return (
       <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-lg">
         <h2 className="text-2xl font-bold text-gray-900 mb-4">Cash Out to Local Currency</h2>
