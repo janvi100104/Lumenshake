@@ -2,9 +2,18 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { PayrollContract } from '@/utils/contract';
+import { 
+  pollTransactionStatus, 
+  formatTransactionStatus, 
+  getStatusColor,
+  TransactionInfo 
+} from '@/utils/transactionStatus';
+import { useToast } from '@/components/Toast';
 
 const CONTRACT_ID = process.env.NEXT_PUBLIC_CONTRACT_ID || '';
-const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || 'https://rpc-futurenet.stellar.org';
+const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || 'https://soroban-testnet.stellar.org';
+const NETWORK = process.env.NEXT_PUBLIC_NETWORK || 'testnet';
+const EXPLORER_URL = 'https://stellar.expert/explorer/testnet';
 
 type EmployerDashboardProps = {
   employerAddress: string | null;
@@ -16,6 +25,7 @@ export default function EmployerDashboard({
   isWalletConnected,
 }: EmployerDashboardProps) {
   const payrollContract = useMemo(() => new PayrollContract(CONTRACT_ID, RPC_URL), []);
+  const toast = useToast();
 
   const [employeeAddress, setEmployeeAddress] = useState('');
   const [salary, setSalary] = useState('');
@@ -26,6 +36,12 @@ export default function EmployerDashboard({
   const [isEmployerRegistered, setIsEmployerRegistered] = useState(false);
   const [registrationLoading, setRegistrationLoading] = useState(false);
   const [registrationTxHash, setRegistrationTxHash] = useState<string | null>(null);
+  const [depositAmount, setDepositAmount] = useState('');
+  const [escrowBalance, setEscrowBalance] = useState<string>('0');
+  
+  // Transaction status tracking
+  const [recentTransactions, setRecentTransactions] = useState<TransactionInfo[]>([]);
+  const [pollingTx, setPollingTx] = useState<string | null>(null);
 
   const isReadyToCheckRegistration = Boolean(isWalletConnected && employerAddress && CONTRACT_ID);
   const canSubmit = Boolean(
@@ -46,6 +62,41 @@ export default function EmployerDashboard({
     }
 
     return employerAddress;
+  };
+
+  // Start polling for transaction status
+  const startTransactionPolling = async (txHash: string, actionName: string) => {
+    setPollingTx(txHash);
+    
+    try {
+      const finalStatus = await pollTransactionStatus(txHash, RPC_URL, {
+        intervalMs: 2000,
+        maxAttempts: 30,
+        onStatusChange: (status) => {
+          // Update recent transactions list
+          setRecentTransactions((prev) => {
+            const existing = prev.findIndex((t) => t.txHash === txHash);
+            if (existing >= 0) {
+              const updated = [...prev];
+              updated[existing] = status;
+              return updated;
+            }
+            return [...prev, status];
+          });
+        },
+      });
+
+      // Show notification based on final status
+      if (finalStatus.status === 'success') {
+        console.log(`✅ ${actionName} confirmed on-chain`);
+      } else if (finalStatus.status === 'failed') {
+        console.error(`❌ ${actionName} failed:`, finalStatus.error);
+      }
+    } catch (error) {
+      console.error(`Error polling ${actionName}:`, error);
+    } finally {
+      setPollingTx(null);
+    }
   };
 
   useEffect(() => {
@@ -85,6 +136,32 @@ export default function EmployerDashboard({
     };
   }, [employerAddress, isReadyToCheckRegistration, payrollContract]);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadEscrowBalance = async () => {
+      if (!CONTRACT_ID) {
+        return;
+      }
+
+      try {
+        const balance = await payrollContract.getEscrowBalance();
+        if (!cancelled) {
+          // Convert from stroops (7 decimals for USDC) to human-readable
+          setEscrowBalance((Number(balance) / 10_000_000).toFixed(2));
+        }
+      } catch (error: unknown) {
+        console.error('Failed to fetch escrow balance:', error);
+      }
+    };
+
+    void loadEscrowBalance();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [payrollContract]);
+
   const handleRegisterEmployer = async (e: React.FormEvent) => {
     e.preventDefault();
     setRegistrationLoading(true);
@@ -92,14 +169,22 @@ export default function EmployerDashboard({
     try {
       const activeEmployer = getEmployerAddress();
       const response = await payrollContract.registerEmployer(activeEmployer, kycHash);
-      const txMessage = response.txHash
-        ? `\nTx: ${response.txHash}`
+      const txHash = response.txHash || null;
+      
+      setRegistrationTxHash(txHash);
+      setIsEmployerRegistered(true);
+      setKycHash('');
+
+      // Start polling for transaction confirmation
+      if (txHash) {
+        startTransactionPolling(txHash, 'Employer Registration');
+      }
+
+      const txMessage = txHash
+        ? `\nTx: ${txHash}`
         : '';
 
       alert(`Employer registered successfully!${txMessage}`);
-      setRegistrationTxHash(response.txHash || null);
-      setIsEmployerRegistered(true);
-      setKycHash('');
     } catch (error: unknown) {
       console.error('Error registering employer:', error);
       const message = error instanceof Error ? error.message : 'Failed to register employer';
@@ -122,8 +207,15 @@ export default function EmployerDashboard({
         'USDC'
       );
 
-      const txMessage = response.txHash
-        ? `\nTx: ${response.txHash}`
+      const txHash = response.txHash || null;
+
+      // Start polling for transaction confirmation
+      if (txHash) {
+        startTransactionPolling(txHash, 'Add Employee');
+      }
+
+      const txMessage = txHash
+        ? `\nTx: ${txHash}`
         : '';
 
       alert(`Employee added successfully!${txMessage}`);
@@ -150,8 +242,15 @@ export default function EmployerDashboard({
 
       const activeEmployer = getEmployerAddress();
       const response = await payrollContract.runPayroll(activeEmployer, parsedPeriod);
-      const txMessage = response.txHash
-        ? `\nTx: ${response.txHash}`
+      const txHash = response.txHash || null;
+
+      // Start polling for transaction confirmation
+      if (txHash) {
+        startTransactionPolling(txHash, 'Run Payroll');
+      }
+
+      const txMessage = txHash
+        ? `\nTx: ${txHash}`
         : '';
 
       alert(`Payroll executed successfully!${txMessage}`);
@@ -159,6 +258,39 @@ export default function EmployerDashboard({
     } catch (error: unknown) {
       console.error('Error running payroll:', error);
       const message = error instanceof Error ? error.message : 'Failed to run payroll';
+      alert(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDepositEscrow = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const activeEmployer = getEmployerAddress();
+      const response = await payrollContract.depositEscrow(activeEmployer, depositAmount);
+      const txHash = response.txHash || null;
+
+      // Start polling for transaction confirmation
+      if (txHash) {
+        startTransactionPolling(txHash, 'Deposit Escrow');
+      }
+
+      const txMessage = txHash
+        ? `\nTx: ${txHash}`
+        : '';
+
+      alert(`Successfully deposited ${depositAmount} USDC to escrow!${txMessage}`);
+      setDepositAmount('');
+      
+      // Refresh escrow balance
+      const balance = await payrollContract.getEscrowBalance();
+      setEscrowBalance((Number(balance) / 10_000_000).toFixed(2));
+    } catch (error: unknown) {
+      console.error('Error depositing to escrow:', error);
+      const message = error instanceof Error ? error.message : 'Failed to deposit to escrow';
       alert(message);
     } finally {
       setLoading(false);
@@ -176,6 +308,58 @@ export default function EmployerDashboard({
             {employerAddress || 'Not connected'}
           </p>
         </div>
+
+        {/* Escrow Balance */}
+        <div className="mb-8 rounded-lg border border-blue-200 p-4 bg-blue-50">
+          <p className="text-sm text-blue-600 mb-2">Escrow Balance</p>
+          <p className="text-3xl font-bold text-blue-800">{escrowBalance} USDC</p>
+          <p className="text-xs text-blue-600 mt-2">
+            Funds available for payroll distribution
+          </p>
+        </div>
+
+        {/* Transaction Status Monitor */}
+        {recentTransactions.length > 0 && (
+          <div className="mb-8">
+            <h3 className="text-lg font-semibold mb-4">Recent Transactions</h3>
+            <div className="space-y-3">
+              {recentTransactions.slice(-5).reverse().map((tx) => {
+                const statusColor = getStatusColor(tx.status);
+                const explorerLink = `${EXPLORER_URL}/tx/${tx.txHash}`;
+                
+                return (
+                  <div
+                    key={tx.txHash}
+                    className={`rounded-lg border p-4 ${statusColor}`}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="font-medium">
+                        {formatTransactionStatus(tx.status)}
+                      </p>
+                      {tx.status === 'pending' && pollingTx === tx.txHash && (
+                        <span className="text-xs animate-pulse">Polling...</span>
+                      )}
+                    </div>
+                    <p className="text-xs font-mono break-all mb-2 opacity-75">
+                      {tx.txHash}
+                    </p>
+                    {tx.error && (
+                      <p className="text-xs mt-2 opacity-75">{tx.error}</p>
+                    )}
+                    <a
+                      href={explorerLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs underline hover:opacity-75"
+                    >
+                      View on Stellar Explorer →
+                    </a>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Employer Registration */}
         <div className="mb-8">
@@ -218,6 +402,37 @@ export default function EmployerDashboard({
               </button>
             </form>
           )}
+        </div>
+
+        {/* Deposit to Escrow */}
+        <div className="mb-8">
+          <h3 className="text-lg font-semibold mb-4">Deposit to Escrow</h3>
+          <form onSubmit={handleDepositEscrow} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Amount (USDC)
+              </label>
+              <input
+                type="number"
+                value={depositAmount}
+                onChange={(e) => setDepositAmount(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="1000"
+                disabled={!canSubmit || loading || registrationLoading}
+                required
+              />
+              <p className="mt-2 text-xs text-gray-500">
+                Deposit USDC to escrow for payroll distribution. You must have USDC in your wallet.
+              </p>
+            </div>
+            <button
+              type="submit"
+              disabled={loading || registrationLoading || !canSubmit}
+              className="w-full px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400 transition font-medium"
+            >
+              {loading ? 'Depositing...' : 'Deposit to Escrow'}
+            </button>
+          </form>
         </div>
 
         {/* Add Employee Form */}

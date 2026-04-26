@@ -1,0 +1,23 @@
+                 List of relations
+ Schema |          Name          | Type  |  Owner   
+--------+------------------------+-------+----------
+ public | audit_logs             | table | postgres
+ public | employees              | table | postgres
+ public | employers              | table | postgres
+ public | exchange_rates         | table | postgres
+ public | idempotency_keys       | table | postgres
+ public | moneygram_locations    | table | postgres
+ public | moneygram_transactions | table | postgres
+ public | outbox                 | table | postgres
+ public | payroll_claims         | table | postgres
+ public | payroll_periods        | table | postgres
+ public | sep10_nonces           | table | postgres
+ public | sep12_customers        | table | postgres
+ public | sep12_kyc_history      | table | postgres
+ public | sep24_transactions     | table | postgres
+ public | sep31_transactions     | table | postgres
+ public | transactions           | table | postgres
+ public | webhook_deliveries     | table | postgres
+ public | webhook_subscriptions  | table | postgres
+(18 rows)
+

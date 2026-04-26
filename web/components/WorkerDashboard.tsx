@@ -2,10 +2,16 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { PayrollContract } from '@/utils/contract';
+import { 
+  pollTransactionStatus, 
+  formatTransactionStatus, 
+  getStatusColor,
+  TransactionInfo 
+} from '@/utils/transactionStatus';
 
 const CONTRACT_ID = process.env.NEXT_PUBLIC_CONTRACT_ID || '';
-const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || 'https://rpc-futurenet.stellar.org';
-const EXPLORER_URL = 'https://stellar.expert/explorer/futurenet';
+const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || 'https://soroban-testnet.stellar.org';
+const EXPLORER_URL = 'https://stellar.expert/explorer/testnet';
 
 type WorkerDashboardProps = {
   workerAddress: string | null;
@@ -33,6 +39,10 @@ export default function WorkerDashboard({
   } | null>(null);
   const [claimTxHash, setClaimTxHash] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  
+  // Transaction status tracking
+  const [claimTxStatus, setClaimTxStatus] = useState<TransactionInfo | null>(null);
+  const [pollingClaim, setPollingClaim] = useState(false);
 
   const isReady = Boolean(isWalletConnected && workerAddress && CONTRACT_ID);
 
@@ -97,6 +107,7 @@ export default function WorkerDashboard({
     setLoading(true);
     setError(null);
     setClaimTxHash(null);
+    setClaimTxStatus(null);
 
     try {
       const parsedPeriod = parseInt(period, 10);
@@ -114,12 +125,32 @@ export default function WorkerDashboard({
         parsedPeriod
       );
 
-      setClaimTxHash(response.txHash || null);
-      alert(`Payroll claimed successfully!${response.txHash ? `\nTx: ${response.txHash}` : ''}`);
+      const txHash = response.txHash || null;
+      setClaimTxHash(txHash);
+
+      // Start polling for transaction confirmation
+      if (txHash) {
+        setPollingClaim(true);
+        try {
+          const finalStatus = await pollTransactionStatus(txHash, RPC_URL, {
+            intervalMs: 2000,
+            maxAttempts: 30,
+            onStatusChange: (status) => {
+              setClaimTxStatus(status);
+            },
+          });
+
+          if (finalStatus.status === 'success') {
+            // Refresh payroll status after successful claim
+            const periodData = await payrollContract.getPayrollPeriod(employerAddress, parsedPeriod);
+            setPayrollPeriod(periodData);
+          }
+        } finally {
+          setPollingClaim(false);
+        }
+      }
       
-      // Refresh status
-      const periodData = await payrollContract.getPayrollPeriod(employerAddress, parsedPeriod);
-      setPayrollPeriod(periodData);
+      alert(`Payroll claimed successfully!${txHash ? `\nTx: ${txHash}` : ''}`);
     } catch (err: unknown) {
       console.error('Error claiming payroll:', err);
       setError(err instanceof Error ? err.message : 'Failed to claim payroll');
@@ -205,8 +236,8 @@ export default function WorkerDashboard({
             <h4 className="font-semibold text-green-800 mb-2">Employee Information</h4>
             <div className="space-y-1 text-sm text-green-700">
               <p>
-                <span className="font-medium">Salary:</span> {employeeData.salary.toString()}{' '}
-                {employeeData.currency}
+                <span className="font-medium">Salary:</span>{' '}
+                {(Number(employeeData.salary) / 10_000_000).toFixed(2)} {employeeData.currency}
               </p>
             </div>
           </div>
@@ -218,7 +249,7 @@ export default function WorkerDashboard({
             <div className="space-y-1 text-sm text-purple-700">
               <p>
                 <span className="font-medium">Total Amount:</span>{' '}
-                {payrollPeriod.total_amount.toString()}
+                {(Number(payrollPeriod.total_amount) / 10_000_000).toFixed(2)} USDC
               </p>
               <p>
                 <span className="font-medium">Status:</span>{' '}
@@ -242,7 +273,7 @@ export default function WorkerDashboard({
                 disabled={loading || checkingStatus}
                 className="w-full px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 transition font-medium"
               >
-                {loading ? 'Processing Claim...' : `Claim ${employeeData.salary.toString()} ${employeeData.currency}`}
+                {loading ? 'Processing Claim...' : `Claim ${(Number(employeeData.salary) / 10_000_000).toFixed(2)} ${employeeData.currency}`}
               </button>
             </form>
           </div>
@@ -250,21 +281,59 @@ export default function WorkerDashboard({
 
         {/* Transaction Success */}
         {claimTxHash && (
-          <div className="mb-8 rounded-lg border border-green-200 bg-green-50 p-4">
-            <h4 className="font-semibold text-green-800 mb-2">✓ Claim Successful!</h4>
-            <p className="text-sm text-green-700 mb-2">Transaction Hash:</p>
-            <p className="text-xs font-mono break-all bg-white p-2 rounded border border-green-200">
-              {claimTxHash}
-            </p>
-            {explorerLink && (
-              <a
-                href={explorerLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-3 inline-block text-sm text-blue-600 hover:text-blue-800 hover:underline"
+          <div className="mb-8">
+            <h3 className="text-lg font-semibold mb-4">Claim Transaction Status</h3>
+            
+            {claimTxStatus ? (
+              <div
+                className={`rounded-lg border p-4 ${getStatusColor(claimTxStatus.status)}`}
               >
-                View on Stellar Explorer →
-              </a>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="font-medium">
+                    {formatTransactionStatus(claimTxStatus.status)}
+                  </p>
+                  {claimTxStatus.status === 'pending' && pollingClaim && (
+                    <span className="text-xs animate-pulse">Polling...</span>
+                  )}
+                </div>
+                <p className="text-xs font-mono break-all mb-2 opacity-75">
+                  {claimTxHash}
+                </p>
+                {claimTxStatus.error && (
+                  <p className="text-xs mt-2 opacity-75">{claimTxStatus.error}</p>
+                )}
+                {claimTxStatus.ledger && (
+                  <p className="text-xs mt-2">
+                    <span className="font-medium">Ledger:</span> {claimTxStatus.ledger}
+                  </p>
+                )}
+                <a
+                  href={explorerLink || '#'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-3 inline-block text-sm text-blue-600 hover:text-blue-800 hover:underline"
+                >
+                  View on Stellar Explorer →
+                </a>
+              </div>
+            ) : (
+              <div className="rounded-lg border border-green-200 bg-green-50 p-4">
+                <h4 className="font-semibold text-green-800 mb-2">✓ Claim Successful!</h4>
+                <p className="text-sm text-green-700 mb-2">Transaction Hash:</p>
+                <p className="text-xs font-mono break-all bg-white p-2 rounded border border-green-200">
+                  {claimTxHash}
+                </p>
+                {explorerLink && (
+                  <a
+                    href={explorerLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-3 inline-block text-sm text-blue-600 hover:text-blue-800 hover:underline"
+                  >
+                    View on Stellar Explorer →
+                  </a>
+                )}
+              </div>
             )}
           </div>
         )}

@@ -4,10 +4,11 @@ import { useState } from 'react';
 import WalletConnection from '@/components/WalletConnection';
 import EmployerDashboard from '@/components/EmployerDashboard';
 import WorkerDashboard from '@/components/WorkerDashboard';
+import SEP24Dashboard from '@/components/SEP24Dashboard';
+import CashOutDashboard from '@/components/CashOutDashboard';
 import { useWallet } from '@/utils/wallet';
 
-type DashboardTab = 'employer' | 'worker';
-
+type DashboardTab = 'employer' | 'worker' | 'deposit' | 'cashout';
 
 // Add tab or route for cash-out
 
@@ -37,7 +38,7 @@ export default function Home() {
 
       {/* Tab Navigation */}
       <div className="max-w-7xl mx-auto px-6 py-6">
-        <div className="bg-white rounded-lg shadow-sm p-2 inline-flex">
+        <div className="bg-white rounded-lg shadow-sm p-2 inline-flex flex-wrap gap-2">
           <button
             onClick={() => setActiveTab('employer')}
             className={`px-6 py-2 rounded-md font-medium transition ${
@@ -46,7 +47,7 @@ export default function Home() {
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
-            Employer Dashboard
+            Employer
           </button>
           <button
             onClick={() => setActiveTab('worker')}
@@ -56,7 +57,27 @@ export default function Home() {
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
-            Worker Dashboard
+            Worker
+          </button>
+          <button
+            onClick={() => setActiveTab('deposit')}
+            className={`px-6 py-2 rounded-md font-medium transition ${
+              activeTab === 'deposit'
+                ? 'bg-blue-600 text-white'
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            Deposit/Withdraw
+          </button>
+          <button
+            onClick={() => setActiveTab('cashout')}
+            className={`px-6 py-2 rounded-md font-medium transition ${
+              activeTab === 'cashout'
+                ? 'bg-green-600 text-white'
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            💵 Cash Out
           </button>
         </div>
       </div>
@@ -68,11 +89,15 @@ export default function Home() {
             employerAddress={wallet.address}
             isWalletConnected={wallet.isConnected}
           />
-        ) : (
+        ) : activeTab === 'worker' ? (
           <WorkerDashboard
             workerAddress={wallet.address}
             isWalletConnected={wallet.isConnected}
           />
+        ) : activeTab === 'deposit' ? (
+          <SEP24Dashboard />
+        ) : (
+          <CashOutDashboard />
         )}
       </main>
 

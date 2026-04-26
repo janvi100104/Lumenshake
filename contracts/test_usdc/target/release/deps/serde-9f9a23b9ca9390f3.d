@@ -1,0 +1,14 @@
+/home/janviunix/JANVI/project/Lumenshake/contracts/test_usdc/target/release/deps/serde-9f9a23b9ca9390f3.d: /home/janviunix/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs /home/janviunix/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs /home/janviunix/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs /home/janviunix/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs /home/janviunix/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs /home/janviunix/JANVI/project/Lumenshake/contracts/test_usdc/target/release/build/serde-aefa9ec47cd09ba6/out/private.rs
+
+/home/janviunix/JANVI/project/Lumenshake/contracts/test_usdc/target/release/deps/libserde-9f9a23b9ca9390f3.rlib: /home/janviunix/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs /home/janviunix/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs /home/janviunix/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs /home/janviunix/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs /home/janviunix/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs /home/janviunix/JANVI/project/Lumenshake/contracts/test_usdc/target/release/build/serde-aefa9ec47cd09ba6/out/private.rs
+
+/home/janviunix/JANVI/project/Lumenshake/contracts/test_usdc/target/release/deps/libserde-9f9a23b9ca9390f3.rmeta: /home/janviunix/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs /home/janviunix/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs /home/janviunix/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs /home/janviunix/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs /home/janviunix/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs /home/janviunix/JANVI/project/Lumenshake/contracts/test_usdc/target/release/build/serde-aefa9ec47cd09ba6/out/private.rs
+
+/home/janviunix/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs:
+/home/janviunix/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs:
+/home/janviunix/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs:
+/home/janviunix/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs:
+/home/janviunix/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs:
+/home/janviunix/JANVI/project/Lumenshake/contracts/test_usdc/target/release/build/serde-aefa9ec47cd09ba6/out/private.rs:
+
+# env-dep:OUT_DIR=/home/janviunix/JANVI/project/Lumenshake/contracts/test_usdc/target/release/build/serde-aefa9ec47cd09ba6/out

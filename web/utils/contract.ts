@@ -1,6 +1,7 @@
 import { contract } from '@stellar/stellar-sdk';
 import { signTransaction as freighterSignTransaction } from '@stellar/freighter-api';
 
+const TESTNET_PASSPHRASE = 'Test SDF Network ; September 2015';
 const FUTURENET_PASSPHRASE = 'Test SDF Future Network ; October 2022';
 const PUBLIC_NETWORK_PASSPHRASE = 'Public Global Stellar Network ; September 2015';
 const ACCOUNT_NOT_FOUND_PATTERN = /Account not found:\s*([A-Z0-9]+)/i;
@@ -10,6 +11,10 @@ const getFriendbotUrl = (address: string): string => {
 };
 
 const prettifyPassphrase = (networkPassphrase: string): string => {
+  if (networkPassphrase === TESTNET_PASSPHRASE) {
+    return 'Testnet';
+  }
+
   if (networkPassphrase === FUTURENET_PASSPHRASE) {
     return 'Futurenet';
   }
@@ -45,6 +50,10 @@ export interface PayrollPeriod {
 }
 
 type PayrollClient = contract.Client & {
+  initialize: (args: {
+    admin: string;
+    usdc_token: string;
+  }) => Promise<contract.AssembledTransaction<unknown>>;
   register_employer: (args: {
     employer: string;
     kyc_hash: Uint8Array;
@@ -64,6 +73,11 @@ type PayrollClient = contract.Client & {
     employer: string;
     period: bigint;
   }) => Promise<contract.AssembledTransaction<unknown>>;
+  deposit_escrow: (args: {
+    employer: string;
+    amount: bigint;
+  }) => Promise<contract.AssembledTransaction<unknown>>;
+  get_escrow_balance: () => Promise<contract.AssembledTransaction<bigint>>;
   get_employer: (args: {
     employer: string;
   }) => Promise<contract.AssembledTransaction<Employer | null>>;
@@ -194,12 +208,18 @@ export class PayrollContract {
   private contractId: string;
   private rpcUrl: string;
   private networkPassphrase: string;
+  private usdcTokenAddress: string;
 
-  constructor(contractId: string, rpcUrl: string = 'https://rpc-futurenet.stellar.org') {
+  constructor(
+    contractId: string,
+    rpcUrl: string = 'https://soroban-testnet.stellar.org',
+    usdcTokenAddress: string = 'GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5'
+  ) {
     this.contractId = contractId;
     this.rpcUrl = rpcUrl;
     this.networkPassphrase =
-      process.env.NEXT_PUBLIC_NETWORK_PASSPHRASE || FUTURENET_PASSPHRASE;
+      process.env.NEXT_PUBLIC_NETWORK_PASSPHRASE || TESTNET_PASSPHRASE;
+    this.usdcTokenAddress = usdcTokenAddress;
   }
 
   private async getClient(publicKey?: string): Promise<PayrollClient> {
@@ -346,6 +366,57 @@ export class PayrollContract {
         employer: employerAddress,
         period: parsedPeriod,
       });
+      return tx.result;
+    } catch (error: unknown) {
+      throw new Error(normalizeError(error, this.networkPassphrase));
+    }
+  }
+
+  async initializeContract(adminAddress: string): Promise<ContractResult<unknown>> {
+    try {
+      const client = await this.getClient(adminAddress);
+      const tx = await client.initialize({
+        admin: adminAddress,
+        usdc_token: this.usdcTokenAddress,
+      });
+
+      const sentTx = await tx.signAndSend();
+      assertContractResult(sentTx.result, 'Contract initialization');
+
+      return {
+        txHash: sentTx.sendTransactionResponse?.hash || '',
+        result: sentTx.result,
+      };
+    } catch (error: unknown) {
+      throw new Error(normalizeError(error, this.networkPassphrase));
+    }
+  }
+
+  async depositEscrow(employerAddress: string, amount: string): Promise<ContractResult<unknown>> {
+    try {
+      const client = await this.getClient(employerAddress);
+      const parsedAmount = parsePositiveInteger(amount, 'Deposit amount');
+      const tx = await client.deposit_escrow({
+        employer: employerAddress,
+        amount: parsedAmount,
+      });
+
+      const sentTx = await tx.signAndSend();
+      assertContractResult(sentTx.result, 'Deposit to escrow');
+
+      return {
+        txHash: sentTx.sendTransactionResponse?.hash || '',
+        result: sentTx.result,
+      };
+    } catch (error: unknown) {
+      throw new Error(normalizeError(error, this.networkPassphrase));
+    }
+  }
+
+  async getEscrowBalance(): Promise<bigint> {
+    try {
+      const client = await this.getClient();
+      const tx = await client.get_escrow_balance();
       return tx.result;
     } catch (error: unknown) {
       throw new Error(normalizeError(error, this.networkPassphrase));

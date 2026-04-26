@@ -1,7 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { walletService } from '../utils/wallet';
+import { useState, useEffect } from 'react';
+import { useWallet } from '@/utils/wallet';
+import { useToast } from '@/components/Toast';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 
 interface CashOutForm {
   receiverName: string;
@@ -32,8 +35,9 @@ interface Location {
 }
 
 export default function CashOutDashboard() {
-  const [isConnected, setIsConnected] = useState(false);
-  const [walletAddress, setWalletAddress] = useState('');
+  const { account: walletAddress, isConnected, connectWallet } = useWallet();
+  const toast = useToast();
+  
   const [balance, setBalance] = useState<string>('0');
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1); // 1: Amount, 2: Receiver, 3: Location, 4: Confirm
@@ -41,7 +45,7 @@ export default function CashOutDashboard() {
   const [locations, setLocations] = useState<Location[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const [transactionRef, setTransactionRef] = useState<string | null>(null);
-  const [error, setError] = useState('');
+  const [transactionStatus, setTransactionStatus] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<CashOutForm>({
     receiverName: '',
@@ -61,53 +65,56 @@ export default function CashOutDashboard() {
     { code: 'NG', name: 'Nigeria', currency: 'NGN' },
   ];
 
-  useEffect(() => {
-    checkWallet();
-  }, []);
-
+  // Fetch exchange rate when currency or amount changes
   useEffect(() => {
     if (formData.fiatCurrency && formData.cryptoAmount) {
       fetchExchangeRate();
     }
-  }, [formData.fiatCurrency]);
+  }, [formData.fiatCurrency, formData.cryptoAmount]);
 
-  const checkWallet = async () => {
-    try {
-      const address = await walletService.connect();
-      setIsConnected(true);
-      setWalletAddress(address);
-      // Fetch balance from contract or Stellar account
-      setBalance('150.00');
-    } catch (err) {
-      setError('Failed to connect wallet');
+  // Fetch user's balance when connected
+  useEffect(() => {
+    if (isConnected) {
+      fetchBalance();
     }
+  }, [isConnected]);
+
+  const fetchBalance = async () => {
+    // TODO: Fetch actual USDC balance from contract
+    setBalance('150.00'); // Mock balance for now
   };
 
   const fetchExchangeRate = async () => {
     try {
       const response = await fetch(
-        `http://localhost:4000/api/moneygram/exchange-rate?base=USDC&target=${formData.fiatCurrency}`
+        `${API_URL}/moneygram/exchange-rate?base=USDC&target=${formData.fiatCurrency}`
       );
       const result = await response.json();
       if (result.success) {
         setExchangeRate(result.data);
       }
     } catch (err) {
-      console.error('Failed to fetch exchange rate');
+      console.error('Failed to fetch exchange rate:', err);
     }
   };
 
   const fetchLocations = async () => {
     try {
+      setLoading(true);
       const response = await fetch(
-        `http://localhost:4000/api/moneygram/locations?country=${formData.receiverCountry}`
+        `${API_URL}/moneygram/locations?country=${formData.receiverCountry}`
       );
       const result = await response.json();
       if (result.success) {
         setLocations(result.data);
+        if (result.data.length > 0) {
+          toast.info(`${result.data.length} locations found`, 'Select a pickup location');
+        }
       }
     } catch (err) {
-      console.error('Failed to fetch locations');
+      toast.error('Failed to fetch locations', 'Please try again');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -133,27 +140,36 @@ export default function CashOutDashboard() {
 
   const handleNextStep = async () => {
     if (step === 2) {
-      setLoading(true);
       await fetchLocations();
-      setLoading(false);
     }
     setStep(prev => prev + 1);
   };
 
   const handleSubmit = async () => {
     if (!selectedLocation) {
-      setError('Please select a pickup location');
+      toast.error('No location selected', 'Please select a pickup location');
+      return;
+    }
+
+    if (!isConnected) {
+      toast.error('Wallet not connected', 'Please connect your wallet first');
       return;
     }
 
     setLoading(true);
-    setError('');
-
     try {
-      const response = await fetch('http://localhost:4000/api/moneygram/initiate', {
+      const token = localStorage.getItem('sep10_token');
+      if (!token) {
+        toast.error('Not authenticated', 'Please complete SEP-10 authentication first');
+        setLoading(false);
+        return;
+      }
+
+      const response = await fetch(`${API_URL}/moneygram/initiate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
           receiver_name: formData.receiverName,
@@ -165,6 +181,7 @@ export default function CashOutDashboard() {
           fiat_currency: formData.fiatCurrency,
           payout_method: formData.payoutMethod,
           payout_location_id: selectedLocation.location_id,
+          sender_phone: formData.receiverIdNumber, // Would come from KYC in production
         }),
       });
 
@@ -172,17 +189,51 @@ export default function CashOutDashboard() {
 
       if (result.success) {
         setTransactionRef(result.data.moneygram_reference);
+        setTransactionStatus(result.data.status);
         setStep(5); // Success step
+        
+        toast.success(
+          'Cash-out initiated!',
+          `Reference: ${result.data.moneygram_reference}. Send USDC to complete.`
+        );
 
         // TODO: Trigger Stellar transaction to send USDC to escrow
         // await sendUSDCToEscrow(formData.cryptoAmount, result.data);
       } else {
-        setError(result.message || 'Failed to initiate cash-out');
+        toast.error('Cash-out failed', result.message || result.error);
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to process cash-out');
+    } catch (err) {
+      toast.error(
+        'Cash-out failed',
+        err instanceof Error ? err.message : 'Unknown error occurred'
+      );
     } finally {
       setLoading(false);
+    }
+  };
+
+  const checkTransactionStatus = async () => {
+    if (!transactionRef) return;
+
+    try {
+      const token = localStorage.getItem('sep10_token');
+      if (!token) return;
+
+      const response = await fetch(
+        `${API_URL}/moneygram/status/${transactionRef}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        }
+      );
+
+      const result = await response.json();
+      if (result.success) {
+        setTransactionStatus(result.data.status);
+      }
+    } catch (err) {
+      console.error('Failed to check transaction status:', err);
     }
   };
 
@@ -515,7 +566,7 @@ export default function CashOutDashboard() {
         <h2 className="text-2xl font-bold text-gray-900 mb-4">Cash Out to Local Currency</h2>
         <p className="text-gray-600 mb-4">Connect your Stellar wallet to get started.</p>
         <button
-          onClick={checkWallet}
+          onClick={connectWallet}
           className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
         >
           Connect Wallet
@@ -528,6 +579,15 @@ export default function CashOutDashboard() {
     <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-lg">
       <h2 className="text-2xl font-bold text-gray-900 mb-4">Cash Out USDC</h2>
       
+      {/* Wallet Info */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+        <p className="text-sm text-blue-700">Connected Wallet</p>
+        <p className="text-xs font-mono text-blue-900 truncate">{walletAddress}</p>
+        <p className="text-sm text-blue-700 mt-2">
+          Balance: <span className="font-bold">{balance} USDC</span>
+        </p>
+      </div>
+
       {/* Progress Bar */}
       <div className="flex justify-between mb-6">
         {[1, 2, 3, 4, 5].map(s => (
