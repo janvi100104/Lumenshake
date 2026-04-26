@@ -310,6 +310,22 @@ git add .
 git commit -m "feat: add your feature"
 git push origin feature/your-feature-name
 ```
+Employer Dashboard 
+
+<img width="1921" height="1460" alt="LumenShake - Stellar Payroll System (2)" src="https://github.com/user-attachments/assets/fc0776bc-fdec-4bfe-b9c2-0910684571e4" />
+
+
+Worker Dashboard
+
+<img width="1921" height="1460" alt="LumenShake - Stellar Payroll System (1)" src="https://github.com/user-attachments/assets/9da85bfb-98b5-42ba-9bdd-bab13c07a8bf" />
+
+Deposit / Withdraw Portal
+
+<img width="1266" height="867" alt="Screenshot 2026-04-26 164351" src="https://github.com/user-attachments/assets/55992cf9-f90c-477b-9642-18859894120a" />
+
+Cash Out
+
+<img width="1656" height="883" alt="Screenshot 2026-04-26 164448" src="https://github.com/user-attachments/assets/0eb9c479-677b-418c-9b88-4f83e2b5f567" />
 
 ## 📝 License
 
