@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEP-10 Authentication Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .step {
+            background: #f7f9fc;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        
+        .step h2 {
+            color: #667eea;
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            color: #555;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin-bottom: 15px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+        
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .response {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            margin-top: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        
+        .success {
+            color: #4caf50;
+        }
+        
+        .error {
+            color: #f44336;
+        }
+        
+        .info {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .copy-btn {
+            background: #4caf50;
+            padding: 8px 16px;
+            font-size: 14px;
+            width: auto;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 SEP-10 Authentication Tool</h1>
+        <p class="subtitle">Authenticate with your Stellar wallet for TokenPay</p>
+        
+        <div class="info">
+            <strong>ℹ️ How it works:</strong><br>
+            1. Enter your Stellar address to get a challenge<br>
+            2. Sign the challenge with Freighter wallet<br>
+            3. Submit the signed challenge to get your JWT token<br>
+            4. Use the token for authenticated deposit/withdrawal operations
+        </div>
+        
+        <!-- Step 1: Get Challenge -->
+        <div class="step">
+            <h2>Step 1: Get Authentication Challenge</h2>
+            <label for="stellarAddress">Your Stellar Address (G...)</label>
+            <input 
+                type="text" 
+                id="stellarAddress" 
+                placeholder="GABC123...YOUR_ADDRESS_HERE"
+                value=""
+            >
+            <button onclick="getChallenge()" id="challengeBtn">Get Challenge</button>
+            <div id="challengeResponse" class="response hidden"></div>
+        </div>
+        
+        <!-- Step 2: Sign Challenge -->
+        <div class="step">
+            <h2>Step 2: Sign the Challenge</h2>
+            <div class="info">
+                <strong>📝 Instructions:</strong><br>
+                1. Open Freighter wallet extension<br>
+                2. Or use browser console (F12) with this code:<br>
+                <code style="display: block; margin-top: 10px; background: #f0f0f0; padding: 10px; border-radius: 4px;">
+                    const { signTransaction } = await import('@stellar/freighter-api');<br>
+                    const signed = await signTransaction("PASTE_CHALLENGE_HERE", {<br>
+                    &nbsp;&nbsp;address: "YOUR_ADDRESS",<br>
+                    &nbsp;&nbsp;networkPassphrase: "Test SDF Network ; September 2015"<br>
+                    });<br>
+                    console.log(signed);
+                </code>
+            </div>
+            <label for="signedXdr">Signed Transaction XDR</label>
+            <textarea 
+                id="signedXdr" 
+                placeholder="Paste your signed XDR here..."
+            ></textarea>
+            <button onclick="verifyChallenge()" id="verifyBtn">Verify & Get JWT Token</button>
+            <div id="verifyResponse" class="response hidden"></div>
+        </div>
+        
+        <!-- Step 3: JWT Token -->
+        <div class="step" id="tokenStep" class="hidden">
+            <h2>Step 3: Your JWT Token</h2>
+            <div id="tokenDisplay" class="response"></div>
+            <button class="copy-btn" onclick="copyToken()">📋 Copy Token</button>
+        </div>
+        
+        <!-- Step 4: Test Deposit -->
+        <div class="step hidden" id="depositStep">
+            <h2>Step 4: Test Authenticated Deposit</h2>
+            <label for="depositAmount">Deposit Amount (USDC)</label>
+            <input type="number" id="depositAmount" value="1000" placeholder="1000">
+            <button onclick="testDeposit()" id="depositBtn">Create Deposit Transaction</button>
+            <div id="depositResponse" class="response hidden"></div>
+        </div>
+    </div>
+    
+    <script>
+        const BACKEND_URL = 'http://localhost:4000';
+        let jwtToken = '';
+        let challengeXdr = '';
+        
+        async function getChallenge() {
+            const address = document.getElementById('stellarAddress').value.trim();
+            
+            if (!address || !address.startsWith('G')) {
+                alert('Please enter a valid Stellar address (starts with G)');
+                return;
+            }
+            
+            const btn = document.getElementById('challengeBtn');
+            btn.disabled = true;
+            btn.textContent = 'Getting challenge...';
+            
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/auth/challenge?account=${address}`);
+                const data = await response.json();
+                
+                const responseDiv = document.getElementById('challengeResponse');
+                responseDiv.classList.remove('hidden');
+                
+                if (data.error) {
+                    responseDiv.className = 'response error';
+                    responseDiv.textContent = `Error: ${data.error}\n${data.message}`;
+                } else {
+                    responseDiv.className = 'response success';
+                    challengeXdr = data.transaction;
+                    responseDiv.textContent = `✅ Challenge received!\n\nNetwork: ${data.network_passphrase}\n\nChallenge XDR:\n${challengeXdr}\n\n👉 Copy this XDR and sign it with your wallet, then paste in Step 2.`;
+                }
+            } catch (error) {
+                const responseDiv = document.getElementById('challengeResponse');
+                responseDiv.classList.remove('hidden');
+                responseDiv.className = 'response error';
+                responseDiv.textContent = `❌ Failed to get challenge: ${error.message}\n\nMake sure the backend server is running on ${BACKEND_URL}`;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Get Challenge';
+            }
+        }
+        
+        async function verifyChallenge() {
+            const signedXdr = document.getElementById('signedXdr').value.trim();
+            
+            if (!signedXdr) {
+                alert('Please paste the signed XDR from your wallet');
+                return;
+            }
+            
+            const btn = document.getElementById('verifyBtn');
+            btn.disabled = true;
+            btn.textContent = 'Verifying...';
+            
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/auth/auth`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ transaction: signedXdr }),
+                });
+                
+                const data = await response.json();
+                const responseDiv = document.getElementById('verifyResponse');
+                responseDiv.classList.remove('hidden');
+                
+                if (data.error) {
+                    responseDiv.className = 'response error';
+                    responseDiv.textContent = `❌ Authentication failed: ${data.error}\n${data.message}`;
+                } else {
+                    responseDiv.className = 'response success';
+                    jwtToken = data.token;
+                    
+                    responseDiv.textContent = `✅ Authentication successful!\n\nAccount: ${data.account}\nToken Type: ${data.token_type}\nExpires In: ${data.expires_in}\n\n👉 Your JWT token is ready. Check Step 3.`;
+                    
+                    // Show token
+                    document.getElementById('tokenDisplay').textContent = jwtToken;
+                    document.getElementById('tokenStep').classList.remove('hidden');
+                    
+                    // Show deposit step
+                    document.getElementById('depositStep').classList.remove('hidden');
+                    
+                    // Scroll to token
+                    document.getElementById('tokenStep').scrollIntoView({ behavior: 'smooth' });
+                }
+            } catch (error) {
+                const responseDiv = document.getElementById('verifyResponse');
+                responseDiv.classList.remove('hidden');
+                responseDiv.className = 'response error';
+                responseDiv.textContent = `❌ Verification failed: ${error.message}`;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Verify & Get JWT Token';
+            }
+        }
+        
+        async function testDeposit() {
+            if (!jwtToken) {
+                alert('You need to authenticate first');
+                return;
+            }
+            
+            const amount = document.getElementById('depositAmount').value;
+            const btn = document.getElementById('depositBtn');
+            btn.disabled = true;
+            btn.textContent = 'Creating deposit...';
+            
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/sep24/deposit`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${jwtToken}`,
+                    },
+                    body: JSON.stringify({
+                        asset_code: 'USDC',
+                        asset_issuer: 'GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5',
+                        amount: amount,
+                    }),
+                });
+                
+                const data = await response.json();
+                const responseDiv = document.getElementById('depositResponse');
+                responseDiv.classList.remove('hidden');
+                
+                if (data.error) {
+                    responseDiv.className = 'response error';
+                    responseDiv.textContent = `❌ Deposit failed: ${data.error}\n${data.message}`;
+                } else {
+                    responseDiv.className = 'response success';
+                    responseDiv.textContent = `✅ Deposit transaction created!\n\n${JSON.stringify(data, null, 2)}`;
+                }
+            } catch (error) {
+                const responseDiv = document.getElementById('depositResponse');
+                responseDiv.classList.remove('hidden');
+                responseDiv.className = 'response error';
+                responseDiv.textContent = `❌ Failed to create deposit: ${error.message}`;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Create Deposit Transaction';
+            }
+        }
+        
+        function copyToken() {
+            navigator.clipboard.writeText(jwtToken).then(() => {
+                alert('JWT token copied to clipboard!');
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                // Fallback
+                const textarea = document.createElement('textarea');
+                textarea.value = jwtToken;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                alert('JWT token copied to clipboard!');
+            });
+        }
+        
+        // Auto-focus on page load
+        window.addEventListener('load', () => {
+            document.getElementById('stellarAddress').focus();
+        });
+    </script>
+</body>
+</html>
