@@ -312,8 +312,7 @@ git push origin feature/your-feature-name
 ```
 Employer Dashboard 
 
-<img width="1921" height="1460" alt="LumenShake - Stellar Payroll System (2)" src="https://github.com/user-attachments/assets/fc0776bc-fdec-4bfe-b9c2-0910684571e4" />
-
+<img width="1921" height="2374" alt="LumenShake - Stellar Payroll System (3)" src="https://github.com/user-attachments/assets/f815bb09-0439-4959-84ec-4861a37ae7d3" />
 
 Worker Dashboard
 
