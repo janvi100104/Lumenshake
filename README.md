@@ -5,7 +5,7 @@
 [![Demo](https://img.shields.io/badge/Demo-Live-brightgreen)](http://localhost:3000)
 [![Network](https://img.shields.io/badge/Network-Stellar%20Testnet-blue)](https://stellar.expert/explorer/testnet/contract/CBHNF7LHWNUWW77T2EVGMXOPJ5HHQXU3JNMS5MX5PI5XRHX4WGM46V7Z)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
-[![Feedback](https://img.shields.io/badge/Feedback-Share%20Thoughts-orange)](https://forms.gle/4h4EiXHue2EvKZt59)
+[![Feedback](https://img.shields.io/badge/Feedback-Share%20Thoughts-orange)](https://forms.gle/Jgji7Pe1AiTKJXEi6)
 
 ## 🎯 What is Lumenshake?
 
@@ -268,11 +268,11 @@ We'd love to hear your thoughts on Lumenshake! Your feedback helps us improve th
 
 ### 📝 Feedback Form
 Share your thoughts, suggestions, and report issues:
-**[📊 Submit Feedback via Google Form](https://forms.gle/4h4EiXHue2EvKZt59)**
+**[📊 Submit Feedback via Google Form](https://forms.gle/Jgji7Pe1AiTKJXEi6)**
 
 ### 📈 View Feedback Data
 See all collected feedback and responses:
-**[📄 View Feedback Spreadsheet](https://docs.google.com/spreadsheets/d/1MW2XCGREFD10hfBYo1vDOeq6A2rcvsNM12O45H7A4fs/edit?resourcekey=&gid=412778729#gid=412778729)**
+**[📄 View Feedback Spreadsheet](https://docs.google.com/spreadsheets/d/1PsHztWKXBd4vVPzIIuzmMXyfw2eG8goRqEGx3QfPeAw/edit?resourcekey#gid=1715253295)**
 
 Your input on:
 - User experience
@@ -344,8 +344,8 @@ MIT License - see [LICENSE](LICENSE) file for details
 
 - **Project Repository**: [github.com/janvi100104/Lumenshake](https://github.com/janvi100104/Lumenshake)
 - **Stellar Discord**: https://discord.gg/stellardev
-- **Feedback Form**: https://forms.gle/4h4EiXHue2EvKZt59
-- **Feedback Spreadsheet**: https://docs.google.com/spreadsheets/d/1MW2XCGREFD10hfBYo1vDOeq6A2rcvsNM12O45H7A4fs/edit
+- **Feedback Form**: https://forms.gle/Jgji7Pe1AiTKJXEi6
+- **Feedback Spreadsheet**: https://docs.google.com/spreadsheets/d/1PsHztWKXBd4vVPzIIuzmMXyfw2eG8goRqEGx3QfPeAw/edit?resourcekey#gid=1715253295
 - **Email**: Create an issue on GitHub
 
 ---
