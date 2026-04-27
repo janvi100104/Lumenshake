@@ -1,0 +1,25 @@
+# Prometheus Configuration
+# Scrapes metrics from Lumenshake backend and Node.js
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  # Lumenshake Backend Metrics
+  - job_name: 'lumenshake-backend'
+    static_configs:
+      - targets: ['host.docker.internal:4000']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  # Node.js Process Metrics
+  - job_name: 'nodejs'
+    static_configs:
+      - targets: ['host.docker.internal:4000']
+    metrics_path: '/metrics'
+
+  # PostgreSQL Metrics (if using postgres_exporter)
+  - job_name: 'postgresql'
+    static_configs:
+      - targets: ['host.docker.internal:9187']

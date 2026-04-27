@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEP-10 XDR Generator</title>
+    <script src="https://cdn.jsdelivr.net/npm/@stellar/stellar-sdk@15/stellar-sdk.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .step {
+            margin-bottom: 30px;
+            padding: 20px;
+            border-left: 4px solid #667eea;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        
+        .step h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-right: 10px;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .output-box {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            word-break: break-all;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+        
+        .success {
+            background: #d4edda;
+            border-left-color: #28a745;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        
+        .error {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        
+        .info {
+            background: #d1ecf1;
+            border-left-color: #17a2b8;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        
+        .copy-btn {
+            background: #28a745;
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 SEP-10 XDR Generator</h1>
+            <p>Generate, sign, and verify SEP-10 authentication transactions</p>
+        </div>
+        
+        <div class="content">
+            <!-- Step 1: Configuration -->
+            <div class="step">
+                <h3>📋 Step 1: Configuration</h3>
+                <div class="grid">
+                    <div class="form-group">
+                        <label for="apiUrl">Backend API URL:</label>
+                        <input type="text" id="apiUrl" value="http://localhost:4000/api" placeholder="http://localhost:4000/api">
+                    </div>
+                    <div class="form-group">
+                        <label for="network">Network:</label>
+                        <select id="network">
+                            <option value="testnet">Testnet</option>
+                            <option value="mainnet">Mainnet</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="accountAddress">Stellar Account (Public Key):</label>
+                    <input type="text" id="accountAddress" placeholder="GABC...XYZ" value="">
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="generateKeypair" checked> 
+                        Generate new test keypair (for testing)
+                    </label>
+                </div>
+                <button onclick="generateKeypair()">🔑 Generate Test Keypair</button>
+            </div>
+
+            <!-- Step 2: Get Challenge -->
+            <div class="step">
+                <h3>📡 Step 2: Get Challenge</h3>
+                <button onclick="getChallenge()">🚀 Request Challenge from Backend</button>
+                <div id="challengeOutput" style="margin-top: 15px;"></div>
+            </div>
+
+            <!-- Step 3: Sign Transaction -->
+            <div class="step">
+                <h3>✍️ Step 3: Sign Transaction</h3>
+                <div class="form-group">
+                    <label for="secretKey">Secret Key (for signing):</label>
+                    <input type="text" id="secretKey" placeholder="SABC...XYZ" value="">
+                </div>
+                <button onclick="signTransaction()">✍️ Sign Transaction</button>
+                <div id="signOutput" style="margin-top: 15px;"></div>
+            </div>
+
+            <!-- Step 4: Verify & Get JWT -->
+            <div class="step">
+                <h3>🔐 Step 4: Verify & Get JWT Token</h3>
+                <button onclick="verifyChallenge()">🔓 Verify & Get Token</button>
+                <div id="verifyOutput" style="margin-top: 15px;"></div>
+            </div>
+
+            <!-- Step 5: Test Authentication -->
+            <div class="step">
+                <h3>🧪 Step 5: Test Authenticated Request</h3>
+                <button onclick="testAuth()">🚀 Test with JWT Token</button>
+                <div id="testOutput" style="margin-top: 15px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { Keypair, TransactionBuilder, Networks } = StellarSdk;
+        
+        let currentKeypair = null;
+        let challengeXdr = null;
+        let signedXdr = null;
+        let jwtToken = null;
+        let networkPassphrase = Networks.TESTNET;
+
+        // Generate test keypair
+        function generateKeypair() {
+            currentKeypair = Keypair.random();
+            document.getElementById('accountAddress').value = currentKeypair.publicKey();
+            document.getElementById('secretKey').value = currentKeypair.secret();
+            
+            showInfo('Keypair Generated', 
+                `Public Key: ${currentKeypair.publicKey()}<br>Secret Key: ${currentKeypair.secret()}`);
+        }
+
+        // Get challenge from backend
+        async function getChallenge() {
+            const account = document.getElementById('accountAddress').value.trim();
+            const apiUrl = document.getElementById('apiUrl').value.trim();
+            
+            if (!account) {
+                showError('Error', 'Please enter a Stellar account address');
+                return;
+            }
+
+            networkPassphrase = document.getElementById('network').value === 'mainnet' 
+                ? Networks.PUBLIC 
+                : Networks.TESTNET;
+
+            try {
+                showLoading('challengeOutput', 'Requesting challenge...');
+                
+                const response = await fetch(`${apiUrl}/auth/challenge?account=${account}`);
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Failed to get challenge');
+                }
+
+                challengeXdr = data.transaction;
+                
+                showSuccess('challengeOutput', 'Challenge Received', 
+                    `XDR: <div class="output-box">${challengeXdr}</div>
+                     <button class="copy-btn" onclick="copyToClipboard('${challengeXdr}')">📋 Copy XDR</button>`);
+                
+            } catch (error) {
+                showError('Error', error.message);
+            }
+        }
+
+        // Sign transaction
+        function signTransaction() {
+            const secret = document.getElementById('secretKey').value.trim();
+            
+            if (!challengeXdr) {
+                showError('Error', 'Please get a challenge first');
+                return;
+            }
+
+            if (!secret) {
+                showError('Error', 'Please enter secret key');
+                return;
+            }
+
+            try {
+                const keypair = Keypair.fromSecret(secret);
+                const transaction = TransactionBuilder.fromXDR(challengeXdr, networkPassphrase);
+                
+                transaction.sign(keypair);
+                signedXdr = transaction.toXDR();
+
+                showSuccess('signOutput', 'Transaction Signed', 
+                    `Signed XDR: <div class="output-box">${signedXdr}</div>
+                     <button class="copy-btn" onclick="copyToClipboard('${signedXdr}')">📋 Copy Signed XDR</button>`);
+                
+            } catch (error) {
+                showError('Error', 'Failed to sign: ' + error.message);
+            }
+        }
+
+        // Verify challenge and get JWT
+        async function verifyChallenge() {
+            const apiUrl = document.getElementById('apiUrl').value.trim();
+            
+            if (!signedXdr) {
+                showError('Error', 'Please sign the transaction first');
+                return;
+            }
+
+            try {
+                showLoading('verifyOutput', 'Verifying challenge...');
+                
+                const response = await fetch(`${apiUrl}/auth/auth`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ transaction: signedXdr })
+                });
+                
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Verification failed');
+                }
+
+                jwtToken = data.token;
+
+                showSuccess('verifyOutput', 'Authentication Successful!', 
+                    `Account: ${data.account}<br>
+                     Expires: ${data.expires_in}<br>
+                     Token Type: ${data.token_type}<br><br>
+                     JWT Token: <div class="output-box">${jwtToken}</div>
+                     <button class="copy-btn" onclick="copyToClipboard('${jwtToken}')">📋 Copy Token</button>`);
+                
+            } catch (error) {
+                showError('Error', error.message);
+            }
+        }
+
+        // Test authenticated request
+        async function testAuth() {
+            const apiUrl = document.getElementById('apiUrl').value.trim();
+            const account = document.getElementById('accountAddress').value.trim();
+            
+            if (!jwtToken) {
+                showError('Error', 'Please verify challenge first');
+                return;
+            }
+
+            try {
+                showLoading('testOutput', 'Testing authenticated request...');
+                
+                const response = await fetch(`${apiUrl}/customer?account=${account}`, {
+                    headers: { 'Authorization': `Bearer ${jwtToken}` }
+                });
+                
+                const data = await response.json();
+
+                if (response.ok) {
+                    showSuccess('testOutput', 'Authenticated Request Successful', 
+                        `<pre class="output-box">${JSON.stringify(data, null, 2)}</pre>`);
+                } else {
+                    showError('Error', data.message || 'Request failed');
+                }
+                
+            } catch (error) {
+                showError('Error', error.message);
+            }
+        }
+
+        // Utility functions
+        function showInfo(title, message) {
+            const div = document.createElement('div');
+            div.className = 'info';
+            div.innerHTML = `<strong>ℹ️ ${title}</strong><br>${message}`;
+            
+            const parent = event.target.parentElement;
+            const existing = parent.querySelector('.info, .success, .error');
+            if (existing) existing.remove();
+            
+            parent.appendChild(div);
+        }
+
+        function showSuccess(containerId, title, message) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = `
+                <div class="success">
+                    <strong>✅ ${title}</strong><br>
+                    ${message}
+                </div>
+            `;
+        }
+
+        function showError(containerId, message) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = `
+                <div class="error">
+                    <strong>❌ Error:</strong> ${message}
+                </div>
+            `;
+        }
+
+        function showLoading(containerId, message) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = `<div class="info">⏳ ${message}...</div>`;
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Copied to clipboard!');
+            });
+        }
+
+        // Auto-generate keypair on load
+        window.onload = function() {
+            generateKeypair();
+        };
+    </script>
+</body>
+</html>

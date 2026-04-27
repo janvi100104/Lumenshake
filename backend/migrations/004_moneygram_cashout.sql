@@ -66,10 +66,10 @@ CREATE TABLE IF NOT EXISTS moneygram_transactions (
     metadata JSONB
 );
 
-CREATE INDEX idx_moneygram_reference ON moneygram_transactions(moneygram_reference);
-CREATE INDEX idx_moneygram_sender ON moneygram_transactions(sender_stellar_account);
-CREATE INDEX idx_moneygram_status ON moneygram_transactions(status);
-CREATE INDEX idx_moneygram_receiver_country ON moneygram_transactions(receiver_country);
+CREATE INDEX IF NOT EXISTS idx_moneygram_reference ON moneygram_transactions(moneygram_reference);
+CREATE INDEX IF NOT EXISTS idx_moneygram_sender ON moneygram_transactions(sender_stellar_account);
+CREATE INDEX IF NOT EXISTS idx_moneygram_status ON moneygram_transactions(status);
+CREATE INDEX IF NOT EXISTS idx_moneygram_receiver_country ON moneygram_transactions(receiver_country);
 
 -- MoneyGram agent locations cache
 CREATE TABLE IF NOT EXISTS moneygram_locations (
@@ -93,9 +93,9 @@ CREATE TABLE IF NOT EXISTS moneygram_locations (
     is_active BOOLEAN DEFAULT TRUE
 );
 
-CREATE INDEX idx_moneygram_locations_country ON moneygram_locations(country);
-CREATE INDEX idx_moneygram_locations_city ON moneygram_locations(city);
-CREATE INDEX idx_moneygram_locations_active ON moneygram_locations(is_active);
+CREATE INDEX IF NOT EXISTS idx_moneygram_locations_country ON moneygram_locations(country);
+CREATE INDEX IF NOT EXISTS idx_moneygram_locations_city ON moneygram_locations(city);
+CREATE INDEX IF NOT EXISTS idx_moneygram_locations_active ON moneygram_locations(is_active);
 
 -- Exchange rate cache
 CREATE TABLE IF NOT EXISTS exchange_rates (
@@ -109,10 +109,11 @@ CREATE TABLE IF NOT EXISTS exchange_rates (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE UNIQUE INDEX idx_exchange_rates_pair ON exchange_rates(base_currency, target_currency);
-CREATE INDEX idx_exchange_rates_valid ON exchange_rates(valid_until);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_exchange_rates_pair ON exchange_rates(base_currency, target_currency);
+CREATE INDEX IF NOT EXISTS idx_exchange_rates_valid ON exchange_rates(valid_until);
 
 -- Trigger for updating updated_at
+DROP TRIGGER IF EXISTS update_moneygram_transactions_updated_at ON moneygram_transactions;
 CREATE TRIGGER update_moneygram_transactions_updated_at BEFORE UPDATE ON moneygram_transactions
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 

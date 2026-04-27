@@ -11,9 +11,13 @@ const sep24Routes = require('./routes/sep24');
 const sep31Routes = require('./routes/sep31');
 const webhookRoutes = require('./routes/webhooks');
 const moneygramRoutes = require('./routes/moneygram');
+const metricsRoutes = require('./routes/metrics');
+const recurringRoutes = require('./routes/recurring');
 const idempotencyMiddleware = require('./middleware/idempotency');
 const auditMiddleware = require('./middleware/audit');
-const { strictLimiter, standardLimiter } = require('./middleware/rateLimiter');
+const metricsMiddleware = require('./middleware/metrics');
+const cacheMiddleware = require('./middleware/cache');
+const { strictLimiter, standardLimiter, healthLimiter } = require('./middleware/rateLimiter');
 const { securityHeaders, customSecurityHeaders } = require('./middleware/security');
 const { sanitizeInput } = require('./middleware/validation');
 
@@ -56,23 +60,45 @@ app.use((req, res, next) => {
   next();
 });
 
-// Health check endpoint
-app.get('/health', (req, res) => {
+// Prometheus metrics middleware
+app.use(metricsMiddleware.metricsMiddleware);
+
+// Health check endpoint - with liberal rate limiting and caching
+app.get('/health', healthLimiter.middleware(), cacheMiddleware.cacheMiddlewares.short, (req, res) => {
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
+    database: db.getPoolStats(),
+    cache: cacheMiddleware.getCacheStats(),
   });
 });
 
-// API routes
+// Prometheus metrics endpoint
+app.get('/metrics', metricsMiddleware.metricsEndpoint);
+
+// API routes with caching for frequently accessed endpoints
 app.use('/api/auth', strictLimiter.middleware(), authRoutes); // SEP-10 authentication (strict rate limit)
 app.use('/api/customer', customerRoutes); // SEP-12 customer/KYC
 app.use('/api/sep24', sep24Routes); // SEP-24 interactive payments
 app.use('/api/sep31', sep31Routes); // SEP-31 send/receive
 app.use('/api/webhooks', webhookRoutes); // Webhook management
+app.use('/api/moneygram/exchange-rate', cacheMiddleware.cacheMiddlewares.exchangeRate, moneygramRoutes); // Cached exchange rates
+app.use('/api/moneygram/locations', cacheMiddleware.cacheMiddlewares.locations, moneygramRoutes); // Cached locations
 app.use('/api/moneygram', moneygramRoutes); // MoneyGram cash-out
-app.use('/api/payroll', payrollRoutes);
+app.use('/api/payroll', payrollRoutes); // Payroll management
+app.use('/api/metrics', metricsRoutes); // Metrics dashboard
+app.use('/api/recurring', recurringRoutes); // Recurring payroll
+
+// Cache management endpoints (admin only)
+app.post('/api/cache/clear', (req, res) => {
+  const cleared = cacheMiddleware.clearCache();
+  res.json({ message: `Cache cleared: ${cleared}`, stats: cacheMiddleware.getCacheStats() });
+});
+
+app.get('/api/cache/stats', (req, res) => {
+  res.json(cacheMiddleware.getCacheStats());
+});
 
 // 404 handler
 app.use((req, res) => {

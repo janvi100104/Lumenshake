@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const moneygramService = require('../services/moneygram');
 const sep10Service = require('../services/sep10');
+const { addExplorerLinks, addExplorerLinksToArray } = require('../utils/explorer');
 const logger = require('../services/logger');
 
 /**
@@ -72,7 +73,7 @@ router.get('/status/:reference', sep10Service.authenticate, async (req, res) => 
 
     res.json({
       success: true,
-      data: transaction,
+      data: addExplorerLinks(transaction),
     });
   } catch (error) {
     logger.error('Failed to get cash-out status', error);
@@ -94,7 +95,7 @@ router.get('/transactions', sep10Service.authenticate, async (req, res) => {
 
     res.json({
       success: true,
-      data: transactions,
+      data: addExplorerLinksToArray(transactions),
     });
   } catch (error) {
     logger.error('Failed to get transactions', error);

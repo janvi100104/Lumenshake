@@ -99,24 +99,24 @@ CREATE TABLE IF NOT EXISTS audit_logs (
     user_agent TEXT
 );
 
--- Create indexes for better query performance
-CREATE INDEX idx_employers_stellar_address ON employers(stellar_address);
-CREATE INDEX idx_employees_employer_id ON employees(employer_id);
-CREATE INDEX idx_employees_stellar_address ON employees(stellar_address);
-CREATE INDEX idx_payroll_periods_employer_id ON payroll_periods(employer_id);
-CREATE INDEX idx_payroll_claims_employee_id ON payroll_claims(employee_id);
-CREATE INDEX idx_transactions_tx_hash ON transactions(tx_hash);
-CREATE INDEX idx_transactions_status ON transactions(status);
-CREATE INDEX idx_transactions_stellar_address ON transactions(stellar_address);
-CREATE INDEX idx_outbox_processed ON outbox(processed);
-CREATE INDEX idx_outbox_event_type ON outbox(event_type);
-CREATE INDEX idx_idempotency_keys_key ON idempotency_keys(key);
-CREATE INDEX idx_idempotency_keys_expires ON idempotency_keys(expires_at);
-CREATE INDEX idx_audit_logs_timestamp ON audit_logs(timestamp);
-CREATE INDEX idx_audit_logs_action ON audit_logs(action);
-CREATE INDEX idx_audit_logs_actor ON audit_logs(actor_address);
+-- Create indexes for better query performance (IF NOT EXISTS to handle re-runs)
+CREATE INDEX IF NOT EXISTS idx_employers_stellar_address ON employers(stellar_address);
+CREATE INDEX IF NOT EXISTS idx_employees_employer_id ON employees(employer_id);
+CREATE INDEX IF NOT EXISTS idx_employees_stellar_address ON employees(stellar_address);
+CREATE INDEX IF NOT EXISTS idx_payroll_periods_employer_id ON payroll_periods(employer_id);
+CREATE INDEX IF NOT EXISTS idx_payroll_claims_employee_id ON payroll_claims(employee_id);
+CREATE INDEX IF NOT EXISTS idx_transactions_tx_hash ON transactions(tx_hash);
+CREATE INDEX IF NOT EXISTS idx_transactions_status ON transactions(status);
+CREATE INDEX IF NOT EXISTS idx_transactions_stellar_address ON transactions(stellar_address);
+CREATE INDEX IF NOT EXISTS idx_outbox_processed ON outbox(processed);
+CREATE INDEX IF NOT EXISTS idx_outbox_event_type ON outbox(event_type);
+CREATE INDEX IF NOT EXISTS idx_idempotency_keys_key ON idempotency_keys(key);
+CREATE INDEX IF NOT EXISTS idx_idempotency_keys_expires ON idempotency_keys(expires_at);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_timestamp ON audit_logs(timestamp);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_action ON audit_logs(action);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_actor ON audit_logs(actor_address);
 
--- Create updated_at trigger function
+-- Create updated_at trigger function (OR REPLACE to handle re-runs)
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -125,13 +125,16 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
--- Apply updated_at triggers
+-- Apply updated_at triggers (drop if exists first to handle re-runs)
+DROP TRIGGER IF EXISTS update_employers_updated_at ON employers;
 CREATE TRIGGER update_employers_updated_at BEFORE UPDATE ON employers
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_employees_updated_at ON employees;
 CREATE TRIGGER update_employees_updated_at BEFORE UPDATE ON employees
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_outbox_updated_at ON outbox;
 CREATE TRIGGER update_outbox_updated_at BEFORE UPDATE ON outbox
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 

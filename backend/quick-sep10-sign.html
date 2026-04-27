@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick SEP-10 Sign & Verify</title>
+    <script src="https://cdn.jsdelivr.net/npm/@stellar/stellar-sdk@15/stellar-sdk.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .step {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            border-radius: 4px;
+        }
+        .step h3 {
+            color: #667eea;
+            margin-top: 0;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .output {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            word-break: break-all;
+            margin-top: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .success {
+            background: #d4edda;
+            border-left-color: #28a745;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        .error {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        .info {
+            background: #d1ecf1;
+            border-left-color: #17a2b8;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Quick SEP-10 Sign & Verify</h1>
+        
+        <div class="step">
+            <h3>Step 1: Enter Your Testnet Secret Key</h3>
+            <p style="color: #666; font-size: 14px;">
+                Get this from Freighter (Settings → Export Secret Key) or generate a new testnet account
+            </p>
+            <input type="text" id="secretKey" placeholder="SABC...XYZ (Your testnet secret key)">
+            <button onclick="generateNewTestnetAccount()">🔑 Generate New Testnet Account</button>
+            <div id="accountOutput"></div>
+        </div>
+
+        <div class="step">
+            <h3>Step 2: Sign & Verify (One Click)</h3>
+            <button onclick="signAndVerify()">🚀 Sign Challenge & Get JWT Token</button>
+            <div id="resultOutput"></div>
+        </div>
+    </div>
+
+    <script>
+        const { Keypair, TransactionBuilder, Networks, Aion } = StellarSdk;
+        
+        let currentKeypair = null;
+        const API_URL = 'http://localhost:4000/api';
+
+        // Generate new testnet account
+        async function generateNewTestnetAccount() {
+            try {
+                currentKeypair = Keypair.random();
+                const publicKey = currentKeypair.publicKey();
+                const secretKey = currentKeypair.secret();
+
+                document.getElementById('secretKey').value = secretKey;
+
+                document.getElementById('accountOutput').innerHTML = `
+                    <div class="info">
+                        <strong>✅ New Testnet Account Generated</strong><br>
+                        <strong>Public Key:</strong> ${publicKey}<br>
+                        <strong>Secret Key:</strong> ${secretKey}<br><br>
+                        <em>Funding account with test lumens...</em>
+                    </div>
+                `;
+
+                // Fund with friendbot
+                const response = await fetch(`https://friendbot.stellar.org?addr=${publicKey}`);
+                
+                if (response.ok) {
+                    document.getElementById('accountOutput').innerHTML += `
+                        <div class="success">
+                            <strong>✅ Account funded with 10,000 test XLM!</strong><br>
+                            Ready to use for SEP-10 authentication
+                        </div>
+                    `;
+                }
+
+            } catch (error) {
+                document.getElementById('accountOutput').innerHTML = `
+                    <div class="error">
+                        <strong>❌ Error:</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Sign and verify in one step
+        async function signAndVerify() {
+            const secretKey = document.getElementById('secretKey').value.trim();
+            
+            if (!secretKey) {
+                document.getElementById('resultOutput').innerHTML = `
+                    <div class="error">
+                        <strong>❌ Error:</strong> Please enter your secret key
+                    </div>
+                `;
+                return;
+            }
+
+            try {
+                document.getElementById('resultOutput').innerHTML = `
+                    <div class="info">⏳ Processing... Please wait</div>
+                `;
+
+                // Step 1: Get keypair
+                const keypair = Keypair.fromSecret(secretKey);
+                const publicKey = keypair.publicKey();
+
+                // Step 2: Get challenge
+                const challengeResponse = await fetch(`${API_URL}/auth/challenge?account=${publicKey}`);
+                const challengeData = await challengeResponse.json();
+
+                if (!challengeResponse.ok) {
+                    throw new Error(challengeData.message || 'Failed to get challenge');
+                }
+
+                // Step 3: Sign challenge
+                const transaction = TransactionBuilder.fromXDR(
+                    challengeData.transaction, 
+                    Networks.TESTNET
+                );
+                transaction.sign(keypair);
+                const signedXdr = transaction.toXDR();
+
+                // Step 4: Verify and get JWT
+                const verifyResponse = await fetch(`${API_URL}/auth/auth`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ transaction: signedXdr })
+                });
+
+                const verifyData = await verifyResponse.json();
+
+                if (!verifyResponse.ok) {
+                    throw new Error(verifyData.message || 'Verification failed');
+                }
+
+                // Success!
+                document.getElementById('resultOutput').innerHTML = `
+                    <div class="success">
+                        <strong>✅ Authentication Successful!</strong><br><br>
+                        <strong>Account:</strong> ${verifyData.account}<br>
+                        <strong>Expires:</strong> ${verifyData.expires_in}<br>
+                        <strong>Token Type:</strong> ${verifyData.token_type}<br><br>
+                        <strong>JWT Token:</strong>
+                        <div class="output">${verifyData.token}</div>
+                        <br>
+                        <button onclick="copyToken('${verifyData.token}')">📋 Copy Token</button>
+                        <button onclick="testToken('${verifyData.token}', '${publicKey}')">🧪 Test Token</button>
+                    </div>
+                `;
+
+            } catch (error) {
+                document.getElementById('resultOutput').innerHTML = `
+                    <div class="error">
+                        <strong>❌ Error:</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Copy token to clipboard
+        function copyToken(token) {
+            navigator.clipboard.writeText(token);
+            alert('Token copied to clipboard!');
+        }
+
+        // Test the token
+        async function testToken(token, account) {
+            try {
+                const response = await fetch(`${API_URL}/customer?account=${account}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                
+                alert(`Response: ${JSON.stringify(data).substring(0, 100)}...`);
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        }
+    </script>
+</body>
+</html>

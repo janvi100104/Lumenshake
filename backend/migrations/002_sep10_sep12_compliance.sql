@@ -10,8 +10,8 @@ CREATE TABLE IF NOT EXISTS sep10_nonces (
     used_at TIMESTAMP
 );
 
-CREATE INDEX idx_sep10_nonces_nonce ON sep10_nonces(nonce);
-CREATE INDEX idx_sep10_nonces_used ON sep10_nonces(used);
+CREATE INDEX IF NOT EXISTS idx_sep10_nonces_nonce ON sep10_nonces(nonce);
+CREATE INDEX IF NOT EXISTS idx_sep10_nonces_used ON sep10_nonces(used);
 
 -- SEP-12: Customer information registry
 CREATE TABLE IF NOT EXISTS sep12_customers (
@@ -49,10 +49,10 @@ CREATE TABLE IF NOT EXISTS sep12_customers (
     UNIQUE(stellar_address, type)
 );
 
-CREATE INDEX idx_sep12_customers_address ON sep12_customers(stellar_address);
-CREATE INDEX idx_sep12_customers_type ON sep12_customers(type);
-CREATE INDEX idx_sep12_customers_kyc_status ON sep12_customers(kyc_status);
-CREATE INDEX idx_sep12_customers_email ON sep12_customers(email);
+CREATE INDEX IF NOT EXISTS idx_sep12_customers_address ON sep12_customers(stellar_address);
+CREATE INDEX IF NOT EXISTS idx_sep12_customers_type ON sep12_customers(type);
+CREATE INDEX IF NOT EXISTS idx_sep12_customers_kyc_status ON sep12_customers(kyc_status);
+CREATE INDEX IF NOT EXISTS idx_sep12_customers_email ON sep12_customers(email);
 
 -- SEP-12: KYC status change history (audit trail)
 CREATE TABLE IF NOT EXISTS sep12_kyc_history (
@@ -67,10 +67,11 @@ CREATE TABLE IF NOT EXISTS sep12_kyc_history (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_sep12_kyc_history_address ON sep12_kyc_history(customer_address);
-CREATE INDEX idx_sep12_kyc_history_created ON sep12_kyc_history(created_at);
+CREATE INDEX IF NOT EXISTS idx_sep12_kyc_history_address ON sep12_kyc_history(customer_address);
+CREATE INDEX IF NOT EXISTS idx_sep12_kyc_history_created ON sep12_kyc_history(created_at);
 
 -- Trigger for updating updated_at on customers
+DROP TRIGGER IF EXISTS update_sep12_customers_updated_at ON sep12_customers;
 CREATE TRIGGER update_sep12_customers_updated_at BEFORE UPDATE ON sep12_customers
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 

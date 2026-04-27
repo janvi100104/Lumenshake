@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const sep31Service = require('../services/sep31');
 const sep10Service = require('../services/sep10');
+const { addExplorerLinks, addExplorerLinksToArray } = require('../utils/explorer');
 const logger = require('../services/logger');
 
 /**

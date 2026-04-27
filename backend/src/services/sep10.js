@@ -4,7 +4,8 @@ const {
   TransactionBuilder, 
   Networks, 
   Operation,
-  Transaction 
+  Account,
+  xdr
 } = require('@stellar/stellar-sdk');
 const jwt = require('jsonwebtoken');
 const db = require('../database/db');
@@ -78,9 +79,82 @@ class SEP10Service {
    * @param {string} transactionXdr - Signed transaction XDR
    * @returns {object} JWT token and account info
    */
+  /**
+   * Verify SEP-10 challenge and issue JWT token
+   * @param {string} transactionXdr - Signed transaction XDR
+   * @returns {object} JWT token and account info
+   */
   async verifyChallenge(transactionXdr) {
     try {
-      const transaction = new Transaction(transactionXdr, this.networkPassphrase);
+      // Use raw XDR parsing to avoid SDK v15 compatibility issues
+      let transaction;
+      try {
+        // Try standard parsing first
+        transaction = TransactionBuilder.fromXDR(transactionXdr, this.networkPassphrase);
+      } catch (parseError) {
+        // If that fails, try parsing as raw envelope
+        logger.warn('Standard XDR parsing failed, trying raw envelope parsing', {
+          error: parseError.message
+        });
+        
+        try {
+          const envelope = xdr.TransactionEnvelope.fromXDR(transactionXdr, 'base64');
+          
+          // Extract the transaction from the envelope
+          const txV0 = envelope.v0();
+          if (txV0) {
+            // Reconstruct using TransactionBuilder from raw data
+            const tx = txV0.tx();
+            const sequenceNumber = tx.seqNum().toString();
+            const fee = tx.fee().toString();
+            const sourceAccount = tx.sourceAccount().ed25519().toString('hex');
+            
+            // Convert to proper account ID
+            const sourceAccountStr = StrKey.encodeEd25519PublicKey(
+              Buffer.concat([Buffer.from([0x30]), tx.sourceAccount().ed25519()])
+            );
+            
+            // Build transaction manually
+            const account = new Account(sourceAccountStr, sequenceNumber);
+            
+            transaction = new TransactionBuilder(account, {
+              fee: fee,
+              networkPassphrase: this.networkPassphrase,
+              timebounds: {
+                minTime: tx.timeBounds() ? tx.timeBounds().minTime().toString() : 0,
+                maxTime: tx.timeBounds() ? tx.timeBounds().maxTime().toString() : 0,
+              },
+            });
+            
+            // Add operations
+            for (const op of tx.operations()) {
+              const opBody = op.body();
+              if (opBody.switch().name === 'manageData') {
+                const manageData = opBody.manageDataOp();
+                transaction.addOperation(
+                  Operation.manageData({
+                    name: manageData.dataName(),
+                    value: manageData.dataValue(),
+                    source: op.sourceAccount() ? 
+                      StrKey.encodeEd25519PublicKey(
+                        Buffer.concat([Buffer.from([0x30]), op.sourceAccount().accountId().ed25519()])
+                      ) : sourceAccountStr,
+                  })
+                );
+              }
+            }
+            
+            transaction = transaction.build();
+          } else {
+            throw new Error('Unsupported transaction envelope type');
+          }
+        } catch (rawError) {
+          logger.error('Raw XDR parsing also failed', {
+            error: rawError.message
+          });
+          throw new Error(`Invalid XDR format: ${parseError.message}`);
+        }
+      }
       
       // Validate transaction structure
       this.validateChallengeTransaction(transaction);
@@ -145,10 +219,8 @@ class SEP10Service {
    */
   createFakeAccountForChallenge() {
     const keypair = Keypair.random();
-    return {
-      accountId: () => keypair.publicKey(),
-      sequenceNumber: () => '0',
-    };
+    // Create a proper Account object with sequence number '0'
+    return new Account(keypair.publicKey(), '0');
   }
 
   /**

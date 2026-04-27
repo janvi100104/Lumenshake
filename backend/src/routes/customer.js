@@ -5,10 +5,10 @@ const sep10Service = require('../services/sep10');
 const logger = require('../services/logger');
 
 /**
- * SEP-12: GET /customer
+ * SEP-12: GET /
  * Get customer information
  */
-router.get('/customer', sep10Service.authenticate, async (req, res) => {
+router.get('/', sep10Service.authenticate, async (req, res) => {
   try {
     const { type } = req.query;
     const account = req.stellarAccount;
@@ -36,10 +36,10 @@ router.get('/customer', sep10Service.authenticate, async (req, res) => {
 });
 
 /**
- * SEP-12: PUT /customer
+ * SEP-12: PUT /
  * Register or update customer information
  */
-router.put('/customer', sep10Service.authenticate, async (req, res) => {
+router.put('/', sep10Service.authenticate, async (req, res) => {
   try {
     const customerData = {
       ...req.body,
@@ -63,10 +63,10 @@ router.put('/customer', sep10Service.authenticate, async (req, res) => {
 });
 
 /**
- * SEP-12: DELETE /customer
+ * SEP-12: DELETE /
  * Delete customer information
  */
-router.delete('/customer', sep10Service.authenticate, async (req, res) => {
+router.delete('/', sep10Service.authenticate, async (req, res) => {
   try {
     const { type } = req.query;
     const account = req.stellarAccount;
@@ -87,10 +87,10 @@ router.delete('/customer', sep10Service.authenticate, async (req, res) => {
 });
 
 /**
- * ADMIN: POST /customer/kyc
+ * ADMIN: POST /kyc
  * Update customer KYC status (admin only - would have additional auth in production)
  */
-router.post('/customer/kyc', async (req, res) => {
+router.post('/kyc', async (req, res) => {
   try {
     const { account, kyc_status, kyc_level, notes } = req.body;
 
@@ -123,10 +123,10 @@ router.post('/customer/kyc', async (req, res) => {
 });
 
 /**
- * GET /customer/kyc/requirements
+ * GET /kyc/requirements
  * Get KYC requirements for a specific operation
  */
-router.get('/customer/kyc/requirements', (req, res) => {
+router.get('/kyc/requirements', (req, res) => {
   try {
     const { operation } = req.query;
 
@@ -155,10 +155,10 @@ router.get('/customer/kyc/requirements', (req, res) => {
 });
 
 /**
- * POST /customer/kyc/validate
+ * POST /kyc/validate
  * Validate if customer has required KYC for an operation
  */
-router.post('/customer/kyc/validate', sep10Service.authenticate, async (req, res) => {
+router.post('/kyc/validate', sep10Service.authenticate, async (req, res) => {
   try {
     const { operation } = req.body;
     const account = req.stellarAccount;

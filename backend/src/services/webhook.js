@@ -5,6 +5,48 @@ const logger = require('./logger');
 
 class WebhookService {
   /**
+   * Trigger a new webhook event
+   * Creates a webhook delivery record for all active subscriptions
+   * @param {string} eventType - Event type (e.g., 'moneygram.transaction.ready.for.pickup')
+   * @param {object} payload - Event payload
+   * @returns {number} Number of deliveries created
+   */
+  async triggerWebhook(eventType, payload) {
+    try {
+      // Get all active subscriptions that listen to this event
+      const subscriptions = await db.query(
+        `SELECT * FROM webhook_subscriptions 
+         WHERE active = TRUE 
+           AND ($1 = ANY(event_types) OR 'all' = ANY(event_types))`,
+        [eventType]
+      );
+
+      if (subscriptions.rows.length === 0) {
+        logger.info(`No webhook subscriptions for event: ${eventType}`);
+        return 0;
+      }
+
+      // Create delivery records for each subscription
+      let deliveriesCreated = 0;
+      for (const subscription of subscriptions.rows) {
+        await db.query(
+          `INSERT INTO webhook_deliveries 
+           (webhook_id, event_type, payload, max_attempts)
+           VALUES ($1, $2, $3, $4)`,
+          [subscription.id, eventType, JSON.stringify(payload), 5]
+        );
+        deliveriesCreated++;
+      }
+
+      logger.info(`Created ${deliveriesCreated} webhook deliveries for event: ${eventType}`);
+      return deliveriesCreated;
+    } catch (error) {
+      logger.error(`Failed to trigger webhook for ${eventType}`, error);
+      throw error;
+    }
+  }
+
+  /**
    * Register webhook subscription
    * @param {object} params - Webhook parameters
    * @returns {object} Webhook subscription

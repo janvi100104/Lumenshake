@@ -40,10 +40,10 @@ CREATE TABLE IF NOT EXISTS sep24_transactions (
     metadata JSONB
 );
 
-CREATE INDEX idx_sep24_transaction_id ON sep24_transactions(transaction_id);
-CREATE INDEX idx_sep24_stellar_account ON sep24_transactions(stellar_account);
-CREATE INDEX idx_sep24_kind ON sep24_transactions(kind);
-CREATE INDEX idx_sep24_status ON sep24_transactions(status);
+CREATE INDEX IF NOT EXISTS idx_sep24_transaction_id ON sep24_transactions(transaction_id);
+CREATE INDEX IF NOT EXISTS idx_sep24_stellar_account ON sep24_transactions(stellar_account);
+CREATE INDEX IF NOT EXISTS idx_sep24_kind ON sep24_transactions(kind);
+CREATE INDEX IF NOT EXISTS idx_sep24_status ON sep24_transactions(status);
 
 -- SEP-31: Send/Receive transactions
 CREATE TABLE IF NOT EXISTS sep31_transactions (
@@ -97,10 +97,10 @@ CREATE TABLE IF NOT EXISTS sep31_transactions (
     metadata JSONB
 );
 
-CREATE INDEX idx_sep31_stellar_tx ON sep31_transactions(stellar_transaction_id);
-CREATE INDEX idx_sep31_sender ON sep31_transactions(sender_account);
-CREATE INDEX idx_sep31_receiver ON sep31_transactions(receiver_account);
-CREATE INDEX idx_sep31_status ON sep31_transactions(status);
+CREATE INDEX IF NOT EXISTS idx_sep31_stellar_tx ON sep31_transactions(stellar_transaction_id);
+CREATE INDEX IF NOT EXISTS idx_sep31_sender ON sep31_transactions(sender_account);
+CREATE INDEX IF NOT EXISTS idx_sep31_receiver ON sep31_transactions(receiver_account);
+CREATE INDEX IF NOT EXISTS idx_sep31_status ON sep31_transactions(status);
 
 -- Webhook subscriptions for external notifications
 CREATE TABLE IF NOT EXISTS webhook_subscriptions (
@@ -114,7 +114,7 @@ CREATE TABLE IF NOT EXISTS webhook_subscriptions (
     last_triggered_at TIMESTAMP
 );
 
-CREATE INDEX idx_webhook_active ON webhook_subscriptions(active);
+CREATE INDEX IF NOT EXISTS idx_webhook_active ON webhook_subscriptions(active);
 
 -- Webhook delivery log
 CREATE TABLE IF NOT EXISTS webhook_deliveries (
@@ -131,17 +131,20 @@ CREATE TABLE IF NOT EXISTS webhook_deliveries (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_webhook_deliveries_webhook ON webhook_deliveries(webhook_id);
-CREATE INDEX idx_webhook_deliveries_success ON webhook_deliveries(success);
-CREATE INDEX idx_webhook_deliveries_retry ON webhook_deliveries(next_retry_at);
+CREATE INDEX IF NOT EXISTS idx_webhook_deliveries_webhook ON webhook_deliveries(webhook_id);
+CREATE INDEX IF NOT EXISTS idx_webhook_deliveries_success ON webhook_deliveries(success);
+CREATE INDEX IF NOT EXISTS idx_webhook_deliveries_retry ON webhook_deliveries(next_retry_at);
 
 -- Trigger for updating updated_at
+DROP TRIGGER IF EXISTS update_sep24_transactions_updated_at ON sep24_transactions;
 CREATE TRIGGER update_sep24_transactions_updated_at BEFORE UPDATE ON sep24_transactions
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_sep31_transactions_updated_at ON sep31_transactions;
 CREATE TRIGGER update_sep31_transactions_updated_at BEFORE UPDATE ON sep31_transactions
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_webhook_subscriptions_updated_at ON webhook_subscriptions;
 CREATE TRIGGER update_webhook_subscriptions_updated_at BEFORE UPDATE ON webhook_subscriptions
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
