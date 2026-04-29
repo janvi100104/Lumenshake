@@ -374,67 +374,7 @@ Professional marketing site that appears when users first visit:
 - #13: MaxAmountExceeded
 - #14: InvalidAddress
 
----
 
-## 🔄 Transaction Logging System
-
-All smart contract interactions are automatically logged to PostgreSQL:
-
-### Flow
-
-```
-1. User action (Add Employee, Run Payroll, etc.)
-        ↓
-2. Smart Contract Transaction (on-chain)
-        ↓
-3. Frontend calls: POST /api/payroll/log-transaction
-        ↓
-4. Transaction inserted into PostgreSQL
-        ↓
-5. Ledger Tab displays transaction
-```
-
-### Logged Transaction Types
-
-- ✅ `register_employer` - Employer registration
-- ✅ `add_employee` - Employee addition
-- ✅ `run_payroll` - Payroll execution
-- ✅ `claim_payroll` - Payment claim
--  `deposit` - Escrow funding
-- ⏳ `withdrawal` - Escrow withdrawal
-
-### API Endpoints
-
-#### Log Transaction
-```http
-POST /api/payroll/log-transaction
-Content-Type: application/json
-
-{
-  "tx_hash": "abc123...",
-  "type": "add_employee",
-  "stellar_address": "GCB45M5Q...",
-  "amount": 10.0,
-  "status": "success",
-  "metadata": { ... }
-}
-```
-
-#### Sync Employee
-```http
-POST /api/payroll/sync-employee
-Content-Type: application/json
-
-{
-  "employer_address": "GCA7HG...",
-  "employee_address": "GCB45M5Q...",
-  "salary": 10.0,
-  "currency": "USDC",
-  "tx_hash": "abc123..."
-}
-```
-
----
 
 ##  Environment Variables
 
@@ -548,7 +488,7 @@ cd monitoring
 
 ## 🛡️ Security
 
-### Security Score: 87/100 ✅
+### Security
 
 **Implemented:**
 - ✅ SEP-10 Authentication
@@ -584,38 +524,6 @@ cd monitoring
 
 ---
 
-## 🚧 Roadmap
-
-### Completed ✅
-- [x] Database setup & migrations
-- [x] Smart contract deployment
-- [x] SEP-10/12/24/31 implementation
-- [x] MoneyGram integration
-- [x] Webhook system
-- [x] Explorer links & status polling
-- [x] Metrics dashboard
-- [x] Security audit
-- [x] Production monitoring
-- [x] Data indexing
-- [x] Technical documentation
-- [x] Professional landing page
-- [x] 5-tab dashboard with UI fidelity
-- [x] Transaction logging system
-- [x] Auto-sync (contract ↔ database)
-
-### In Progress 🚧
-- [ ] Advanced features (recurring payroll)
-- [ ] E2E tests
-- [ ] Load testing optimization
-- [ ] Runbooks & incident response
-
-### Planned 📋
-- [ ] Mainnet deployment
-- [ ] Mobile app
-- [ ] Advanced analytics
-- [ ] Multi-currency support
-
----
 
 ## 🤝 Contributing
 
