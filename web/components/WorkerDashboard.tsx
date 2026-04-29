@@ -12,6 +12,7 @@ import {
 const CONTRACT_ID = process.env.NEXT_PUBLIC_CONTRACT_ID || '';
 const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || 'https://soroban-testnet.stellar.org';
 const EXPLORER_URL = 'https://stellar.expert/explorer/testnet';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 
 type WorkerDashboardProps = {
   workerAddress: string | null;
