@@ -1,3 +1,56 @@
+## 🏗️ Architecture
+
+### System Overview
+
+```
+┌─────────────────────────────────────┐
+│         LANDING PAGE                │
+│  (Unauthenticated Users)            │
+│  - Product info                     │
+│  - FAQ accordion                    │
+│  - Connect Wallet CTA               │
+└──────────┬──────────────────────────┘
+           │ Wallet Connected
+           ▼
+┌─────────────────────────────────────┐
+│      DASHBOARD (5 Tabs)             │
+│                                     │
+│  📊 Overview  │ PayRoll  │  Team   │
+│  Ledger       │ CashOut            │
+│                                     │
+│  ┌─────────────────────────────┐   │
+│  │  Freighter Wallet           │   │
+│  │  @stellar/freighter-api     │   │
+│  └─────────────────────────────┘   │
+└──────────┬──────────────────────────┘
+           │ REST API
+           ▼
+┌─────────────────────────────────────┐
+│      BACKEND (Node.js/Express)      │
+│                                     │
+│  Routes:                            │
+│  - /api/payroll/*                   │
+│  - /api/customer/*                  │
+│  - /api/sep24/*                     │
+│  - /api/sep31/*                     │
+│  - /api/moneygram/*                 │
+│                                     │
+│  Middleware:                        │
+│  - SEP-10 Auth                      │
+│  - Rate Limiting                    │
+│  - KYC Gate                         │
+│  - Validation                       │
+│  - Audit Logging                    │
+└──────┬──────────────┬───────────────
+       │              │
+       ▼              ▼
+┌──────────┐    ┌──────────────┐
+│PostgreSQL│    │Stellar Network│
+│ Database │    │ + Soroban    │
+│          │    │ Smart Contract│
+└──────────    └──────────────┘
+
+# Project Structure 
 
 LumenShake/
 ├── web/                          # Next.js Frontend
@@ -114,4 +167,3 @@ LumenShake/
 │
 └── README.md                     # This file
 ```
-
