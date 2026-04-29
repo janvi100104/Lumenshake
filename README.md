@@ -1,34 +1,36 @@
-# 🌟 Lumenshake
+# 🌟 LumenShake
 
-**Stellar-based Payroll & Remittance Platform**
+**Global Payroll Platform on Stellar Network**
 
 [![Demo](https://img.shields.io/badge/Demo-Live-brightgreen)](http://localhost:3000)
-[![Network](https://img.shields.io/badge/Network-Stellar%20Testnet-blue)](https://stellar.expert/explorer/testnet/contract/CBHNF7LHWNUWW77T2EVGMXOPJ5HHQXU3JNMS5MX5PI5XRHX4WGM46V7Z)
+[![Network](https://img.shields.io/badge/Network-Stellar%20Testnet-blue)](https://stellar.expert/explorer/testnet)
 [![Stellar](https://img.shields.io/badge/Stellar-Testnet-1c48f7.svg)](https://stellar.org)
 [![Node.js](https://img.shields.io/badge/Node.js-20+-339933.svg)](https://nodejs.org)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14+-336791.svg)](https://postgresql.org)
+[![Rust](https://img.shields.io/badge/Rust-Soroban-orange.svg)](https://soroban.stellar.org)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
-[![Feedback](https://img.shields.io/badge/Feedback-Share%20Thoughts-orange)](https://forms.gle/Jgji7Pe1AiTKJXEi6)
 
 ---
 
 ## 📖 Overview
 
-Lumenshake is a comprehensive platform that enables employers to pay workers anywhere in the world using USDC stablecoins on the Stellar blockchain, with seamless cash-out to local fiat currency via MoneyGram.
+LumenShake is a comprehensive blockchain-based payroll platform that enables employers to pay workers globally using USDC stablecoins on Stellar, with seamless cash-out to local fiat via MoneyGram.
 
 ### ✨ Key Features
 
-- **🏢 Employer Payroll** - Create payroll periods, add employees, run automated distributions
-- **💰 Worker Payments** - Instant USDC payments with ~5 second confirmation
-- **🌍 Global Cash-Out** - MoneyGram integration for fiat withdrawal in 200+ countries
-- **🔐 SEP-10 Authentication** - Industry-standard Stellar authentication
+- **🏠 Professional Landing Page** - Beautiful marketing site with wallet integration
+- ** 5-Tab Dashboard** - Overview, PayRoll, Team, Ledger, CashOut
+- ** Smart Contract Payroll** - Soroban-based automated distributions
+- **🌍 MoneyGram Cash-Out** - Convert USDC to local fiat in 200+ countries
+- **🔐 SEP-10 Authentication** - Industry-standard Stellar wallet auth
 - **👤 KYC/AML Compliance** - Built-in SEP-12 customer verification
 - **💸 Cross-Border Payments** - SEP-31 international remittances
-- **📊 Real-time Monitoring** - Prometheus/Grafana dashboards and alerting
-- **🔔 Webhook Integration** - Event notifications for your systems
-- **🛡️ Security First** - Rate limiting, input validation, encryption, audit logging
+- **📜 Transaction Ledger** - Complete on-chain audit trail
+- **🔄 Auto-Sync** - Smart contract ↔ Database synchronization
+- **📈 Real-time Monitoring** - Prometheus/Grafana dashboards
+- **️ Security First** - Rate limiting, validation, encryption, audit logs
 
-
+---
 
 ## 🚀 Quick Start
 
@@ -36,15 +38,16 @@ Lumenshake is a comprehensive platform that enables employers to pay workers any
 
 - Node.js 20+
 - PostgreSQL 14+
+- Rust & Soroban CLI (for contract development)
+- Freighter Wallet (browser extension)
 - Docker & Docker Compose (optional, for monitoring)
-- Stellar testnet account
 
 ### Installation
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/yourusername/Lumenshake.git
-cd Lumenshake
+git clone https://github.com/yourusername/LumenShake.git
+cd LumenShake
 
 # 2. Install backend dependencies
 cd backend
@@ -54,10 +57,14 @@ npm install
 cd ../web
 npm install
 
-# 4. Setup environment
-cd ../backend
-cp .env.example .env
-# Edit .env with your configuration
+# 4. Install contract dependencies (if developing contracts)
+cd ../contracts/payroll_contract
+cargo build
+
+# 5. Setup environment
+cd ../../backend
+cp .env.example .env  # Or edit existing .env
+# Update with your configuration
 ```
 
 ### Database Setup
@@ -80,15 +87,17 @@ node scripts/fund-accounts.js
 ```bash
 # Terminal 1: Backend API
 cd backend
-node src/index.js
+npm start
+# Runs on http://localhost:4000
 
-# Terminal 2: Background Worker
-cd backend
-node src/worker.js
-
-# Terminal 3: Frontend (optional)
+# Terminal 2: Frontend
 cd web
 npm run dev
+# Runs on http://localhost:3000
+
+# Terminal 3: Background Worker (optional)
+cd backend
+node src/worker.js
 
 # Terminal 4: Monitoring (optional)
 cd monitoring
@@ -99,154 +108,373 @@ cd monitoring
 
 - **Frontend:** http://localhost:3000
 - **Backend API:** http://localhost:4000
+- **API Health:** http://localhost:4000/health
 - **Prometheus:** http://localhost:9090
 - **Grafana:** http://localhost:3001 (admin/admin)
-- **API Docs:** [docs/API_REFERENCE.md](docs/API_REFERENCE.md)
-
----
-
-## 📚 Documentation
-
-### For Users
-- [📖 User Guide](docs/USER_GUIDE.md) - Step-by-step guides for employers and workers
-- [💵 MoneyGram Cash-Out](docs/USER_GUIDE.md#moneygram-cash-out) - How to cash out to local currency
-- [❓ FAQs](docs/USER_GUIDE.md#faqs) - Frequently asked questions
-
-### For Developers
-- [🔧 Technical Documentation](docs/TECHNICAL_DOCUMENTATION.md) - Complete technical reference
-- [📡 API Reference](docs/API_REFERENCE.md) - All endpoints with examples
-- [🧪 Testing Guide](docs/TESTING_GUIDE.md) - How to run tests
-- [🚀 Deployment Guide](docs/DEPLOYMENT_GUIDE.md) - Production deployment steps
-
-### For Contributors
-- [📋 Project Guide](docs/PROJECT_GUIDE.md) - Architecture and development workflow
-- [🛣️ Roadmap](docs/ROADMAP.md) - Feature roadmap and timeline
-- [📝 Progress](docs/PROGRESS.md) - Development progress tracking
 
 ---
 
 ## 🏗️ Architecture
 
-```
-┌─────────────────┐
-│   Frontend      │  Next.js + TypeScript
-│   (Next.js)     │  Tailwind CSS + Freighter
-└────────┬────────┘
-         │ REST API
-         ▼
-┌─────────────────┐
-│   Backend       │  Node.js + Express
-│   (Express)     │  SEP-10/12/24/31
-└────┬───────┬────┘
-     │       │
-     ▼       ▼
-┌──────────┐ ┌──────────────┐
-│PostgreSQL│ │Stellar Network│
-│ Database │ │ + Soroban     │
-└──────────┘ └──────────────┘
+### System Overview
 
-┌─────────────────────────────┐
-│   Monitoring Stack          │
-│   Prometheus + Grafana      │
-│   Alertmanager              │
-└─────────────────────────────┘
+```
+┌─────────────────────────────────────┐
+│         LANDING PAGE                │
+│  (Unauthenticated Users)            │
+│  - Product info                     │
+│  - FAQ accordion                    │
+│  - Connect Wallet CTA               │
+└──────────┬──────────────────────────┘
+           │ Wallet Connected
+           ▼
+┌─────────────────────────────────────┐
+│      DASHBOARD (5 Tabs)             │
+│                                     │
+│  📊 Overview  │ PayRoll  │  Team   │
+│  Ledger       │ CashOut            │
+│                                     │
+│  ┌─────────────────────────────┐   │
+│  │  Freighter Wallet           │   │
+│  │  @stellar/freighter-api     │   │
+│  └─────────────────────────────┘   │
+└──────────┬──────────────────────────┘
+           │ REST API
+           ▼
+┌─────────────────────────────────────┐
+│      BACKEND (Node.js/Express)      │
+│                                     │
+│  Routes:                            │
+│  - /api/payroll/*                   │
+│  - /api/customer/*                  │
+│  - /api/sep24/*                     │
+│  - /api/sep31/*                     │
+│  - /api/moneygram/*                 │
+│                                     │
+│  Middleware:                        │
+│  - SEP-10 Auth                      │
+│  - Rate Limiting                    │
+│  - KYC Gate                         │
+│  - Validation                       │
+│  - Audit Logging                    │
+└──────┬──────────────┬───────────────
+       │              │
+       ▼              ▼
+┌──────────┐    ┌──────────────┐
+│PostgreSQL│    │Stellar Network│
+│ Database │    │ + Soroban    │
+│          │    │ Smart Contract│
+└──────────    └──────────────┘
 ```
 
 ### Project Structure
 
 ```
-Lumenshake/
-├── backend/              # Node.js API server
+LumenShake/
+├── web/                          # Next.js Frontend
+│   ├── app/
+│   │   ├── page.tsx             # Smart routing (Landing/Dashboard)
+│   │   ├── layout.tsx           # Root layout
+│   │   └── globals.css          # Global styles
+│   ├── components/
+│   │   ├── LandingPage.tsx      # ✨ NEW: Marketing landing page
+│   │   ├── Dashboard.tsx        # Main dashboard with sidebar
+│   │   ├── tabs/
+│   │   │   ├── OverviewTab.tsx  # Stats & wallet connection
+│   │   │   ├── PayRollTab.tsx   # Run payroll & deposits
+│   │   │   ├── TeamTab.tsx      # Employee management
+│   │   │   ├── LedgerTab.tsx    # Transaction history
+│   │   │   ── CashOutTab.tsx   # MoneyGram cash-out
+│   │   ├── EmployerDashboard.tsx
+│   │   ├── WorkerDashboard.tsx
+│   │   └── Toast.tsx
+│   ├── hooks/
+│   │   ── useDashboardData.ts  # Data fetching hooks
+│   ├── utils/
+│   │   ├── wallet.ts            # Freighter integration
+│   │   ├── contract.ts          # Soroban contract calls
+│   │   ├── explorer.ts          # Stellar explorer links
+│   │   └── transactionStatus.ts # Tx polling
+│   └── public/                  # Static assets
+│
+├── backend/                      # Node.js Backend API
 │   ├── src/
-│   │   ├── database/    # Database & migrations
-│   │   ├── middleware/  # Express middleware
-│   │   ├── routes/      # API endpoints
-│   │   ├── services/    # Business logic
-│   │   └── utils/       # Utilities
-│   ├── migrations/      # SQL migrations
-│   ├── scripts/         # Utility scripts
-│   └── logs/            # Application logs
-├── web/                 # Next.js frontend
-│   ├── app/             # Pages
-│   ├── components/      # React components
-│   └── utils/           # Utilities
-├── contracts/           # Soroban smart contracts
+│   │   ├── index.js             # Express server entry
+│   │   ├── worker.js            # Background job processor
+│   │   ├── database/
+│   │   │   ├── db.js            # PostgreSQL connection
+│   │   │   └── migrate.js       # Migration runner
+│   │   ├── routes/
+│   │   │   ├── auth.js          # SEP-10 authentication
+│   │   │   ├── customer.js      # SEP-12 KYC
+│   │   │   ├── payroll.js       # ✨ NEW: Transaction logging
+│   │   │   ├── sep24.js         # Deposits/withdrawals
+│   │   │   ├── sep31.js         # Cross-border payments
+│   │   │   ├── moneygram.js     # Cash-out integration
+│   │   │   ├── recurring.js     # Recurring payroll
+│   │   │   └── webhooks.js      # Event notifications
+│   │   ├── services/
+│   │   │   ├── payroll.js       # Business logic
+│   │   │   ├── sep10.js         # Auth service
+│   │   │   ├── sep12.js         # KYC service
+│   │   │   ├── moneygram.js     # MoneyGram API
+│   │   │   └── recurringPayroll.js
+│   │   ├── middleware/
+│   │   │   ├── audit.js         # Audit logging
+│   │   │   ├── cache.js         # Response caching
+│   │   │   ├── idempotency.js   # Prevent duplicates
+│   │   │   ├── kycGate.js       # KYC verification
+│   │   │   ├── metrics.js       # Prometheus metrics
+│   │   │   ├── rateLimiter.js   # Rate limiting
+│   │   │   ├── security.js      # Security headers
+│   │   │   └── validation.js    # Input validation
+│   │   └── utils/
+│   ├── migrations/              # SQL migrations (8 total)
+│   │   ├── 001_initial_schema.sql
+│   │   ├── 002_sep10_sep12_compliance.sql
+│   │   ├── 003_sep24_sep31_anchor_rails.sql
+│   │   ├── 004_moneygram_cashout.sql
+│   │   ├── 005_seed_moneygram_locations.sql
+│   │   ├── 006_comprehensive_indexing.sql
+│   │   ├── 007_recurring_payroll.sql
+│   │   └── 008_add_transaction_metadata.sql  # ✨ NEW
+│   ├── scripts/
+│   │   ├── onboard-users.js     # Seed test users
+│   │   └── fund-accounts.js     # Fund test accounts
+│   ├── .env                     # Environment variables
+│   ├── package.json
+│   └── Dockerfile
+│
+├── contracts/                    # Soroban Smart Contracts
 │   └── payroll_contract/
-├── monitoring/          # Prometheus/Grafana stack
-├── docs/                # Documentation
-└── scripts/             # Deployment scripts
+│       ├── src/
+│       │   ├── lib.rs           # Main contract (507 lines)
+│       │   └── test.rs          # Unit tests
+│       ├── Cargo.toml
+│       └── test_snapshots/      # Test snapshots
+│
+├── monitoring/                   # Prometheus/Grafana Stack
+│   ├── docker-compose.yml
+│   ├── prometheus.yml
+│   ├── grafana-dashboard.json
+│   ├── alert-rules.yml
+│   ├── alertmanager.yml
+│   └── setup.sh
+│
+├── scripts/                      # Deployment & Utility Scripts
+│   ├── run.sh                   # Quick start script
+│   ├── deploy.sh                # Deployment script
+│   ├── deploy-testnet.sh        # Testnet deployment
+│   ├── demo-verify.sh           # Demo verification
+│   └── sep10-auth-demo.sh       # Auth demo
+│
+├── docs/                         # Documentation (45+ files)
+│   ├── API_REFERENCE.md
+│   ├── DEPLOYMENT_GUIDE.md
+│   ├── TECHNICAL_DOCUMENTATION.md
+│   ├── USER_GUIDE.md
+│   └── ... (40+ more)
+│
+── UI/                           # Design References
+│   ├── Landing page.jpeg        # Landing page design
+│   ├── Overview.jpeg            # Dashboard overview
+│   ├── PayRoll.jpeg             # Payroll tab design
+│   ├── Team.jpg                 # Team tab design
+│   ├── Ledger.jpg               # Ledger tab design
+│   └── CashOut.jpg              # Cash-out tab design
+│
+└── README.md                     # This file
 ```
 
 ---
 
-## 🔑 Environment Variables
+## 🎯 Core Features
+
+### 1. Landing Page
+
+Professional marketing site that appears when users first visit:
+
+- **Header** - LumenShake branding with gradient text
+- **Hero** - "Automate Payroll. Enable Employees."
+- **Utility Spotlight** - Network visualization + 4 key features
+- **FAQ Section** - 4 interactive accordion questions
+- **Connect Wallet** - Freighter integration button
+- **Auto-Redirect** - Switches to Dashboard on wallet connect
+
+### 2. Dashboard (5 Tabs)
+
+#### 📊 Overview Tab
+- Real-time escrow balance
+- Total employees count
+- Payroll periods completed
+- Pending claims
+- Connect wallet banner (if not connected)
+
+#### 💰 PayRoll Tab
+- Run payroll for specific period
+- Deposit to escrow
+- Contract run history
+- Bar chart visualization
+- Form with period & amount
+
+#### 👥 Team Tab
+- Employee table (8 columns)
+- Add new employee modal
+- Register employer functionality
+- KYC status indicators
+- Salary & claim status
+- Blockchain ops sidebar
+- MoneyGram cash-out ready panel
+
+#### 📜 Ledger Tab
+- Transaction history table
+- Tx hash with explorer links
+- Auto-refresh every 10 seconds
+- Soroban contract state panel
+- Network info panel
+- Transaction statistics
+
+#### 💸 CashOut Tab
+- USDC → Fiat conversion
+- MoneyGram integration
+- Amount input
+- Currency selection
+- Country/location picker
+- Step-by-step wizard
+- Tracking number display
+
+### 3. Smart Contract (Soroban/Rust)
+
+**Location:** `contracts/payroll_contract/src/lib.rs`
+
+**Functions:**
+- `register_employer()` - Register new employer
+- `add_employee()` - Add employee with salary
+- `run_payroll()` - Execute payroll distribution
+- `claim_payroll()` - Worker claims payment
+- `deposit_escrow()` - Fund escrow account
+- `get_employer()` - Query employer data
+- `get_employee()` - Query employee data
+- `get_escrow_balance()` - Check escrow balance
+- `get_payroll_period()` - Query period data
+
+**Error Codes:**
+- #1: AlreadyRegistered
+- #2: NotRegistered
+- #3: NotAuthorized
+- #4: EmployeeAlreadyExists
+- #5: EmployeeNotFound
+- #6: PayrollAlreadyRun
+- #7: NoPayrollToClaim
+- #8: ContractPaused
+- #9: InvalidAmount
+- #10: AlreadyInitialized
+- #11: AlreadyClaimed
+- #12: InsufficientEscrowBalance
+- #13: MaxAmountExceeded
+- #14: InvalidAddress
+
+---
+
+## 🔄 Transaction Logging System
+
+All smart contract interactions are automatically logged to PostgreSQL:
+
+### Flow
+
+```
+1. User action (Add Employee, Run Payroll, etc.)
+        ↓
+2. Smart Contract Transaction (on-chain)
+        ↓
+3. Frontend calls: POST /api/payroll/log-transaction
+        ↓
+4. Transaction inserted into PostgreSQL
+        ↓
+5. Ledger Tab displays transaction
+```
+
+### Logged Transaction Types
+
+- ✅ `register_employer` - Employer registration
+- ✅ `add_employee` - Employee addition
+- ✅ `run_payroll` - Payroll execution
+- ✅ `claim_payroll` - Payment claim
+-  `deposit` - Escrow funding
+- ⏳ `withdrawal` - Escrow withdrawal
+
+### API Endpoints
+
+#### Log Transaction
+```http
+POST /api/payroll/log-transaction
+Content-Type: application/json
+
+{
+  "tx_hash": "abc123...",
+  "type": "add_employee",
+  "stellar_address": "GCB45M5Q...",
+  "amount": 10.0,
+  "status": "success",
+  "metadata": { ... }
+}
+```
+
+#### Sync Employee
+```http
+POST /api/payroll/sync-employee
+Content-Type: application/json
+
+{
+  "employer_address": "GCA7HG...",
+  "employee_address": "GCB45M5Q...",
+  "salary": 10.0,
+  "currency": "USDC",
+  "tx_hash": "abc123..."
+}
+```
+
+---
+
+##  Environment Variables
 
 ### Backend (.env)
 
 ```bash
-PORT=4000
-DATABASE_URL=postgresql://user:password@localhost:5432/lumenshake
-JWT_SECRET=your-secret-key
-STELLAR_NETWORK=testnet
-STELLAR_HORIZON_URL=https://horizon-testnet.stellar.org
-SOROBAN_RPC_URL=https://soroban-testnet.stellar.org
-CONTRACT_ID=your-contract-id
-MONEYGRAM_API_KEY=your-api-key
+# Server
 NODE_ENV=development
+PORT=4000
+
+# PostgreSQL
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/lumenshake
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=lumenshake
+DB_USER=postgres
+DB_PASSWORD=postgres
+
+# Stellar
+STELLAR_NETWORK=testnet
+STELLAR_RPC_URL=https://soroban-testnet.stellar.org
+STELLAR_NETWORK_PASSPHRASE=Test SDF Network ; September 2015
+CONTRACT_ID=CCRD5GASTD5IQQPX2ELACIYQRTHQDPWMPFG7AWNWVRP5F6CRT2L3SEAJ
+
+# SEP-10 Auth
+HOME_DOMAIN=localhost:4000
+WEB_AUTH_DOMAIN=LumenShake Payroll
+JWT_SECRET=403112e58be11f3a75c9b979f2d1da98ef61f2f4fd476d2abbcd9d40bc0d14f1bc9251a026d8e000992d6cdc3fca40b65747a56306f16b89999384e890288fd0
+JWT_EXPIRATION=24h
+
+
 ```
 
 ### Frontend (.env.local)
 
 ```bash
 NEXT_PUBLIC_NETWORK=testnet
-NEXT_PUBLIC_BACKEND_URL=http://localhost:4000
-NEXT_PUBLIC_CONTRACT_ID=your-contract-id
-```
-
----
-
-## 🎯 Core Workflows
-
-### Employer Payroll Flow
-
-```
-1. Create Payroll Period
-   → Set dates and name
-
-2. Add Employees
-   → Stellar address + salary amount
-
-3. Run Payroll
-   → Smart contract distributes USDC
-   → ~5 second confirmation
-
-4. Track Claims
-   → Monitor who has claimed payments
-```
-
-### Worker Cash-Out Flow
-
-```
-1. Check Available Payments
-   → View dashboard for ready payments
-
-2. Claim Payment
-   → Receive USDC in wallet
-
-3. Request Cash-Out
-   → Select amount and currency
-
-4. Find MoneyGram Location
-   → Search by country/city
-
-5. Send USDC
-   → Automatic transfer to MoneyGram
-
-6. Receive Tracking Number
-   → Get reference code
-
-7. Pick Up Cash
-   → Visit location with ID
+NEXT_PUBLIC_RPC_URL=https://soroban-testnet.stellar.org
+NEXT_PUBLIC_CONTRACT_ID=CCRD5GASTD5IQQPX2ELACIYQRTHQDPWMPFG7AWNWVRP5F6CRT2L3SEAJ
+NEXT_PUBLIC_API_URL=http://localhost:4000/api
 ```
 
 ---
@@ -254,26 +482,30 @@ NEXT_PUBLIC_CONTRACT_ID=your-contract-id
 ## 🧪 Testing
 
 ```bash
-# Run backend tests
+# Backend tests
 cd backend
 npm test
 
-# Run contract tests
+# Smart contract tests
 cd contracts/payroll_contract
 cargo test
 
-# Run load tests
+# Load tests
 cd backend
 node load-test.js
 
-# Test SEP-10 authentication
+# SEP-10 auth demo
 cd backend
 ./scripts/sep10-auth-demo.sh
+
+# Demo verification
+cd scripts
+./demo-verify.sh
 ```
 
 ---
 
-## 📊 Monitoring
+##  Monitoring
 
 ### Prometheus Metrics
 
@@ -290,16 +522,7 @@ cd backend
 - Alert status
 - System performance
 
-### Alerts
-
-Configured for:
-- High error rate (>0.1 errors/sec)
-- Slow response times (>500ms)
-- Service downtime
-- Database connection issues
-- Transaction failures
-
-### Access Monitoring Stack
+### Start Monitoring
 
 ```bash
 cd monitoring
@@ -310,13 +533,16 @@ cd monitoring
 # Alertmanager: http://localhost:9093
 ```
 
-### 📝 Feedback Form
-Share your thoughts, suggestions, and report issues:  
-**[📊 Submit Feedback via Google Form](https://forms.gle/Jgji7Pe1AiTKJXEi6)**
+---
 
-### 📈 View Feedback Data
-See all collected feedback and responses:  
-**[📄 View Feedback Spreadsheet](https://docs.google.com/spreadsheets/d/1PsHztWKXBd4vVPzIIuzmMXyfw2eG8goRqEGx3QfPeAw/edit?resourcekey#gid=1715253295)**
+## 🌐 Stellar SEP Standards
+
+| SEP | Standard | Status | Description |
+|-----|----------|--------|-------------|
+| **SEP-10** | Authentication | ✅ Complete | Web authentication using Stellar |
+| **SEP-12** | KYC/AML | ✅ Complete | Customer information |
+| **SEP-24** | Interactive Payments | ✅ Complete | Deposits & withdrawals |
+| **SEP-31** | Cross-Border | ✅ Complete | Send payments |
 
 ---
 
@@ -334,21 +560,8 @@ See all collected feedback and responses:
 - ✅ Data Encryption (AES-256 for sensitive data)
 - ✅ Audit Logging (all critical actions)
 - ✅ Idempotency Keys (prevent duplicate requests)
-
-**Security Documentation:**
-- [Security Audit](docs/PHASE7_SECURITY_AUDIT.md)
-- [Security Checklist](docs/TASK10_SECURITY_AUDIT_COMPLETE.md)
-
----
-
-## 🌐 Stellar SEP Standards
-
-| SEP | Standard | Status | Description |
-|-----|----------|--------|-------------|
-| **SEP-10** | Authentication | ✅ Complete | Web authentication using Stellar |
-| **SEP-12** | KYC/AML | ✅ Complete | Customer information |
-| **SEP-24** | Interactive Payments | ✅ Complete | Deposits & withdrawals |
-| **SEP-31** | Cross-Border | ✅ Complete | Send payments |
+- ✅ KYC Gate middleware
+- ✅ Transaction logging & audit trail
 
 ---
 
@@ -367,13 +580,46 @@ See all collected feedback and responses:
 
 - **Tables:** 19
 - **Indexes:** 39 active
-- **Migrations:** 6 (all passing)
+- **Migrations:** 8 (all passing)
+
+---
+
+## 🚧 Roadmap
+
+### Completed ✅
+- [x] Database setup & migrations
+- [x] Smart contract deployment
+- [x] SEP-10/12/24/31 implementation
+- [x] MoneyGram integration
+- [x] Webhook system
+- [x] Explorer links & status polling
+- [x] Metrics dashboard
+- [x] Security audit
+- [x] Production monitoring
+- [x] Data indexing
+- [x] Technical documentation
+- [x] Professional landing page
+- [x] 5-tab dashboard with UI fidelity
+- [x] Transaction logging system
+- [x] Auto-sync (contract ↔ database)
+
+### In Progress 🚧
+- [ ] Advanced features (recurring payroll)
+- [ ] E2E tests
+- [ ] Load testing optimization
+- [ ] Runbooks & incident response
+
+### Planned 📋
+- [ ] Mainnet deployment
+- [ ] Mobile app
+- [ ] Advanced analytics
+- [ ] Multi-currency support
 
 ---
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](docs/PROJECT_GUIDE.md) for details.
+We welcome contributions! Please see our [Contributing Guide](docs/PROJECT_GUIDE.md).
 
 ### Development Workflow
 
@@ -395,64 +641,38 @@ We welcome contributions! Please see our [Contributing Guide](docs/PROJECT_GUIDE
 
 ## 📝 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License.
 
 ---
 
 ## 🙏 Acknowledgments
 
-- **Stellar Development Foundation** - For the Stellar network and SDKs
-- **MoneyGram** - For cash-out integration
-- **Freighter Wallet** - For wallet integration
-- **Soroban** - For smart contract platform
+- **Stellar Development Foundation** - Stellar network and SDKs
+- **MoneyGram** - Cash-out integration
+- **Freighter Wallet** - Wallet integration
+- **Soroban** - Smart contract platform
 
 ---
 
-## 📞 Support
+##  Support
 
-- **Project Repository**: https://github.com/janvi100104/Lumenshake
-- **Documentation:** [docs/](docs/)
-- **Issues:** https://github.com/janvi100104/Lumenshake/issues
-- **Discussions:** https://github.com/janvi100104/Lumenshake/discussions
+- **Repository:** https://github.com/janvi100104/LumenShake
+- **Issues:** https://github.com/janvi100104/LumenShake/issues
+- **Discussions:** https://github.com/janvi100104/LumenShake/discussions
+- **Email:** janvisinghal10@gmail.com
 - **Stellar Discord:** https://discord.gg/stellardev
-- **Feedback Form:** https://forms.gle/Jgji7Pe1AiTKJXEi6
-- **Feedback Spreadsheet:** https://docs.google.com/spreadsheets/d/1PsHztWKXBd4vVPzIIuzmMXyfw2eG8goRqEGx3QfPeAw/edit?resourcekey#gid=1715253295
-- **Email:** janvisinghal10@gmail.com 
 
----
+### 📝 Feedback
 
-## 🚧 Roadmap
+We value your feedback! Help us improve LumenShake:
 
-### Completed ✅
-- [x] Database setup & migrations
-- [x] Smart contract deployment
-- [x] SEP-10 authentication
-- [x] MoneyGram integration
-- [x] Webhook system
-- [x] Explorer links
-- [x] Status polling
-- [x] User onboarding (80+ users)
-- [x] Metrics dashboard
-- [x] Security audit
-- [x] Production monitoring
-- [x] Data indexing
-- [x] Technical documentation
-
-### In Progress 🚧
-- [ ] Advanced features (recurring payroll)
-- [ ] E2E tests
-- [ ] Load testing optimization
-- [ ] Runbooks
-
-### Planned 📋
-- [ ] Community contributions
-- [ ] Mainnet checklist
-- [ ] Mainnet deployment
+- **📋 Submit Feedback:** [Google Form](https://docs.google.com/forms/d/1aPnsXK8LEsUad-0Cv42zf58NYCZjL6hbKgkZPba2Rnk/edit)
+- **📊 View Responses:** [Feedback Spreadsheet](https://docs.google.com/spreadsheets/d/1PsHztWKXBd4vVPzIIuzmMXyfw2eG8goRqEGx3QfPeAw/edit?resourcekey#gid=1715253295)
 
 ---
 
 **Version:** 1.0.0  
-**Last Updated:** 2026-04-27  
+**Last Updated:** 2026-04-29  
 **Status:** Active Development  
 **Network:** Stellar Testnet
 
@@ -462,6 +682,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Built with ❤️ on Stellar**
 
-[Website](https://lumenshake.com) • [Documentation](docs/) • [Support](mailto:support@lumenshake.com)
+[Documentation](docs/) • [Support](mailto:janvisinghal10@gmail.com)
 
 </div>

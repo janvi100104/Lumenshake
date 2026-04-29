@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# TokenPay - Quick Start Script
+# LumenShake - Quick Start Script
 # Run this to start the project
 
-echo "🚀 TokenPay Quick Start"
+echo "🚀 LumenShake Quick Start"
 echo "======================="
 echo ""
 

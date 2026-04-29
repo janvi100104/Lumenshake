@@ -144,6 +144,28 @@ export default function WorkerDashboard({
             // Refresh payroll status after successful claim
             const periodData = await payrollContract.getPayrollPeriod(employerAddress, parsedPeriod);
             setPayrollPeriod(periodData);
+            
+            // Log transaction for Ledger tab
+            try {
+              const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+              await fetch(`${API_URL}/payroll/log-transaction`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  tx_hash: txHash,
+                  type: 'claim_payroll',
+                  stellar_address: workerAddress,
+                  amount: 0, // Will be calculated from contract
+                  status: 'success',
+                  metadata: { 
+                    employer_address: employerAddress,
+                    period: parsedPeriod 
+                  },
+                }),
+              });
+            } catch (logError) {
+              console.error('Failed to log transaction:', logError);
+            }
           }
         } finally {
           setPollingClaim(false);

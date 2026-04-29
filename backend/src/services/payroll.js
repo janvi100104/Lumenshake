@@ -332,6 +332,44 @@ class PayrollService {
     );
     return result.rows;
   }
+  
+  // Get all employees for an employer
+  async getEmployeesByEmployer(employerAddress) {
+    try {
+      // Try to fetch from smart contract first
+      const { SorobanRpc } = require('@stellar/stellar-sdk');
+      const rpcUrl = process.env.SOROBAN_RPC_URL || 'https://soroban-testnet.stellar.org';
+      const contractId = process.env.CONTRACT_ID;
+      
+      if (!contractId) {
+        logger.warn('CONTRACT_ID not set, falling back to database query');
+        return await this.getEmployeesFromDB(employerAddress);
+      }
+
+      const server = new SorobanRpc.Server(rpcUrl);
+      const contract = new (require('@stellar/stellar-sdk')).Contract(contractId);
+      
+      // Get all employees from contract storage
+      // Note: This requires reading the employees map from contract storage
+      // For now, we'll fall back to database
+      return await this.getEmployeesFromDB(employerAddress);
+    } catch (err) {
+      logger.error('Error fetching from contract, falling back to DB', err);
+      return await this.getEmployeesFromDB(employerAddress);
+    }
+  }
+
+  async getEmployeesFromDB(employerAddress) {
+    const result = await db.query(
+      `SELECT e.employee_address, e.salary, e.currency, e.created_at
+       FROM employees e
+       JOIN employers emp ON e.employer_id = emp.id
+       WHERE emp.stellar_address = $1
+       ORDER BY e.created_at DESC`,
+      [employerAddress]
+    );
+    return result.rows;
+  }
 }
 
 module.exports = new PayrollService();

@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# TokenPay - Quick Deployment Script
+# LumenShake - Quick Deployment Script
 # This script helps deploy the payroll contract to Stellar Futurenet
 
-echo "🚀 TokenPay Contract Deployment Script"
+echo "🚀 LumenShake Contract Deployment Script"
 echo "======================================"
 
 # Colors
@@ -138,7 +138,7 @@ echo "Next steps:"
 echo "1. cd web && npm run dev"
 echo "2. Visit http://localhost:3000"
 echo "3. Connect your Freighter wallet"
-echo "4. Start using TokenPay!"
+echo "4. Start using LumenShake!"
 echo ""
 echo "Contract ID: $CONTRACT_ID"
 echo ""

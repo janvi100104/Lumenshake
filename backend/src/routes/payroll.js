@@ -225,4 +225,206 @@ router.get('/transactions/hash/:txHash', async (req, res) => {
   }
 });
 
+// Universal transaction logger (called after any smart contract transaction)
+router.post('/log-transaction', async (req, res) => {
+  try {
+    const { tx_hash, type, stellar_address, amount, status, metadata } = req.body;
+    
+    if (!tx_hash || !type || !stellar_address) {
+      return res.status(400).json({ error: 'Missing required fields: tx_hash, type, stellar_address' });
+    }
+    
+    // Validate type
+    const validTypes = ['add_employee', 'run_payroll', 'claim_payroll', 'register_employer', 'deposit', 'withdrawal'];
+    if (!validTypes.includes(type)) {
+      return res.status(400).json({ error: `Invalid type. Must be one of: ${validTypes.join(', ')}` });
+    }
+    
+    // Insert transaction
+    await db.query(
+      `INSERT INTO transactions (tx_hash, type, stellar_address, amount, status, completed_at)
+       VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP)
+       ON CONFLICT (tx_hash) DO UPDATE SET
+         status = EXCLUDED.status,
+         completed_at = CURRENT_TIMESTAMP`,
+      [tx_hash, type, stellar_address, amount || 0, status || 'success']
+    );
+    
+    logger.info('Transaction logged', {
+      tx_hash,
+      type,
+      stellar_address,
+      amount,
+      status,
+    });
+    
+    res.json({
+      success: true,
+      message: 'Transaction logged successfully',
+    });
+  } catch (err) {
+    logger.error('Error logging transaction', err);
+    res.status(500).json({ error: 'Failed to log transaction' });
+  }
+});
+
+// Sync employee to database (called after smart contract transaction)
+router.post('/sync-employee', async (req, res) => {
+  try {
+    const { employer_address, employee_address, salary, currency, tx_hash } = req.body;
+    
+    if (!employer_address || !employee_address || !salary) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+    
+    // Find or create employer
+    let employerResult = await db.query(
+      'SELECT id FROM employers WHERE stellar_address = $1',
+      [employer_address]
+    );
+    
+    let employerId;
+    if (employerResult.rows.length === 0) {
+      // Employer doesn't exist in DB, create it
+      const insertResult = await db.query(
+        `INSERT INTO employers (stellar_address, kyc_hash, created_at)
+         VALUES ($1, $2, CURRENT_TIMESTAMP)
+         RETURNING id`,
+        [employer_address, '0000000000000000000000000000000000000000000000000000000000000001']
+      );
+      employerId = insertResult.rows[0].id;
+    } else {
+      employerId = employerResult.rows[0].id;
+    }
+    
+    // Convert salary to stroops if it's not already
+    const salaryInStroops = salary < 1000000 ? Math.floor(salary * 10_000_000) : salary;
+    
+    // Insert employee (ignore if already exists)
+    await db.query(
+      `INSERT INTO employees (employer_id, employee_address, salary, currency, created_at)
+       VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP)
+       ON CONFLICT (employer_id, employee_address) DO NOTHING`,
+      [employerId, employee_address, salaryInStroops, currency || 'USDC']
+    );
+    
+    // Log transaction
+    if (tx_hash) {
+      await db.query(
+        `INSERT INTO transactions (tx_hash, type, stellar_address, amount, status, completed_at)
+         VALUES ($1, $2, $3, $4, 'success', CURRENT_TIMESTAMP)
+         ON CONFLICT (tx_hash) DO NOTHING`,
+        [tx_hash, 'add_employee', employee_address, salary]
+      );
+    }
+    
+    logger.info('Employee synced to database', {
+      employer_address,
+      employee_address,
+      salary,
+    });
+    
+    res.json({
+      success: true,
+      message: 'Employee synced successfully',
+    });
+  } catch (err) {
+    logger.error('Error syncing employee', err);
+    res.status(500).json({ error: 'Failed to sync employee' });
+  }
+});
+
+// Get all employees for an employer with KYC status
+router.get('/employers/:address/employees', async (req, res) => {
+  try {
+    let employees = await payrollService.getEmployeesByEmployer(req.params.address);
+    
+    // If no employees in database, try to sync from smart contract events
+    if (employees.length === 0) {
+      logger.info('No employees in DB, attempting to sync from contract events');
+      
+      // Try to fetch recent add_employee transactions and sync them
+      try {
+        const { SorobanRpc } = require('@stellar/stellar-sdk');
+        const rpcUrl = process.env.SOROBAN_RPC_URL || 'https://soroban-testnet.stellar.org';
+        const contractId = process.env.CONTRACT_ID;
+        
+        if (contractId) {
+          const server = new SorobanRpc.Server(rpcUrl);
+          
+          // Get latest ledger
+          const latestLedger = await server.getLatestLedger();
+          
+          // Search for EmployeeAdded events in recent ledgers
+          // This is a simplified approach - in production, use event streaming
+          const events = await server.getEvents({
+            startLedger: latestLedger.sequence - 1000, // Search last 1000 ledgers
+            contractIds: [contractId],
+            topicFilters: [[
+              Buffer.from('EmployeeAdded').toString('base64')
+            ]]
+          });
+          
+          // Sync events to database
+          for (const event of events.events) {
+            try {
+              const eventValue = event.value;
+              // Parse event data and insert into DB if not exists
+              // This is a placeholder - full implementation needs proper event parsing
+              logger.debug('Found EmployeeAdded event', event);
+            } catch (err) {
+              logger.debug('Error parsing event', err);
+            }
+          }
+          
+          // Re-fetch employees after sync attempt
+          employees = await payrollService.getEmployeesByEmployer(req.params.address);
+        }
+      } catch (syncErr) {
+        logger.warn('Failed to sync from contract events', syncErr);
+      }
+    }
+    
+    // Join with KYC data from SEP-12
+    const sep12Service = require('../services/sep12');
+    const employeesWithKYC = await Promise.all(
+      employees.map(async (emp) => {
+        try {
+          const kycData = await sep12Service.getCustomer(emp.employee_address);
+          const fullName = kycData ? `${kycData.first_name || ''} ${kycData.last_name || ''}`.trim() : '';
+          return {
+            employee_address: emp.employee_address,
+            salary: emp.salary,
+            currency: emp.currency,
+            kyc_status: kycData?.kyc_status || 'not_started',
+            kyc_level: kycData?.kyc_level || 'tier_0',
+            name: fullName || 'Unknown',
+            email: kycData?.email || null,
+          };
+        } catch (err) {
+          // If KYC lookup fails, return employee with default KYC status
+          return {
+            employee_address: emp.employee_address,
+            salary: emp.salary,
+            currency: emp.currency,
+            kyc_status: 'not_started',
+            kyc_level: 'tier_0',
+            name: 'Unknown',
+            email: null,
+          };
+        }
+      })
+    );
+    
+    res.json({
+      success: true,
+      data: employeesWithKYC,
+      count: employeesWithKYC.length,
+    });
+  } catch (err) {
+    logger.error('Error fetching employees', err);
+    res.status(500).json({ error: 'Failed to fetch employees' });
+  }
+});
+
 module.exports = router;

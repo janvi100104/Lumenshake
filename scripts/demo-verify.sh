@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# TokenPay Demo Verification Script
+# LumenShake Demo Verification Script
 # Run this before your demo to ensure everything is working
 
-echo "🔍 TokenPay Demo Pre-Check"
+echo "🔍 LumenShake Demo Pre-Check"
 echo "================================"
 echo ""
 
@@ -26,7 +26,7 @@ echo ""
 echo "2️⃣  Checking Smart Contract..."
 RESPONSE=$(stellar contract invoke \
   --id $CONTRACT \
-  --source tokenpay_admin \
+  --source lumenshake_admin \
   --rpc-url $RPC \
   --network-passphrase "$PASSPHRASE" \
   -- get_escrow_balance 2>&1)

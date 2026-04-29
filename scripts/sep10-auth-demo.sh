@@ -19,7 +19,7 @@ NC='\033[0m' # No Color
 
 echo -e "${BLUE}"
 echo "========================================="
-echo "  TokenPay SEP-10 Authentication Demo"
+echo "  LumenShake SEP-10 Authentication Demo"
 echo "========================================="
 echo -e "${NC}"
 
