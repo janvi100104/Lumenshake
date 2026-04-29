@@ -666,7 +666,7 @@ This project is licensed under the MIT License.
 
 We value your feedback! Help us improve LumenShake:
 
-- **📋 Submit Feedback:** [Google Form](https://docs.google.com/forms/d/1aPnsXK8LEsUad-0Cv42zf58NYCZjL6hbKgkZPba2Rnk/edit)
+- **📋 Submit Feedback:** [Google Form](https://forms.gle/Wr1L7tLG7CEkvQZx9)
 - **📊 View Responses:** [Feedback Spreadsheet](https://docs.google.com/spreadsheets/d/1PsHztWKXBd4vVPzIIuzmMXyfw2eG8goRqEGx3QfPeAw/edit?resourcekey#gid=1715253295)
 
 ---
