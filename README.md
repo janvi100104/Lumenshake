@@ -226,6 +226,11 @@ cd scripts
 ```
 
 ---
+📜 Smart Contract Addresses
+Network	Contract Address	Explorer
+Testnet	CCRD5GASTD5IQQPX2ELACIYQRTHQDPWMPFG7AWNWVRP5F6CRT2L3SEAJ   Stellar Expert
+Mainnet	COMING_SOON	-
+
 
 ##  Monitoring
 
