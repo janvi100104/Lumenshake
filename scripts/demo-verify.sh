@@ -8,7 +8,7 @@ echo "================================"
 echo ""
 
 # Configuration
-CONTRACT="CBHNF7LHWNUWW77T2EVGMXOPJ5HHQXU3JNMS5MX5PI5XRHX4WGM46V7Z"
+CONTRACT="CCRD5GASTD5IQQPX2ELACIYQRTHQDPWMPFG7AWNWVRP5F6CRT2L3SEAJ"
 RPC="https://soroban-testnet.stellar.org"
 PASSPHRASE="Test SDF Network ; September 2015"
 
