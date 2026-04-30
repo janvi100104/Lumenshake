@@ -1,0 +1,85 @@
+name: Bug report
+description: Report a reproducible problem in LumenShake
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting this issue.
+
+        Please provide enough detail for maintainers to reproduce and fix it quickly.
+
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      description: One-line description of the bug
+      placeholder: Payroll API returns 500 when creating employee
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Provide a numbered, deterministic reproduction path
+      placeholder: |
+        1. Start backend with npm run dev
+        2. Call POST /api/payroll/employees with ...
+        3. Observe 500 response
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected area
+      options:
+        - backend
+        - web
+        - contracts
+        - monitoring
+        - docs
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, Node version, browser, and relevant tool versions
+      placeholder: Ubuntu 24.04, Node 20.18, Chrome 124
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / screenshots
+      description: Paste relevant logs, stack traces, or screenshots
+      render: shell
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues and this is not a duplicate.
+          required: true
+        - label: I removed secrets/private keys from logs and screenshots.
+          required: true

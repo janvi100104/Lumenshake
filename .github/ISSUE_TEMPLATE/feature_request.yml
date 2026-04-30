@@ -1,0 +1,69 @@
+name: Feature request
+description: Propose a new capability or improvement
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting an improvement.
+
+        Clear context helps us prioritize and implement faster.
+
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      description: One-line feature summary
+      placeholder: Add payroll schedule preview before executing runs
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What pain point are you trying to solve?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe your ideal behavior/API/UI
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Any workarounds or other options you considered
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected area
+      options:
+        - backend
+        - web
+        - contracts
+        - monitoring
+        - docs
+    validations:
+      required: true
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Additional context
+      description: Mockups, API examples, references, etc.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues and this request is not a duplicate.
+          required: true
