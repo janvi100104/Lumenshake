@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+:root {
+  --font-sora: "Segoe UI";
+  --font-geist-mono: "Consolas";
+  --font-space-grotesk: "Trebuchet MS";
+}
+
 @theme {
   --color-background: #ffffff;
   --color-foreground: #171717;

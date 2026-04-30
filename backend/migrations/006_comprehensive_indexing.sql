@@ -119,41 +119,41 @@ ON moneygram_transactions(kyc_verified);
 -- 5. Payroll Periods Indexes
 -- ============================================================
 
--- Fast lookup by status
+-- Fast lookup by claim state (schema uses is_claimed boolean)
 CREATE INDEX IF NOT EXISTS idx_payroll_periods_status 
-ON payroll_periods(status);
+ON payroll_periods(is_claimed);
 
--- Date range queries
+-- Time-based queries (schema uses created_at; no start_date/end_date columns)
 CREATE INDEX IF NOT EXISTS idx_payroll_periods_dates 
-ON payroll_periods(start_date, end_date);
+ON payroll_periods(created_at DESC);
 
--- Composite index for employer active periods
+-- Composite index for employer claim state
 CREATE INDEX IF NOT EXISTS idx_payroll_periods_employer_status 
-ON payroll_periods(employer_id, status);
+ON payroll_periods(employer_id, is_claimed);
 
 -- ============================================================
 -- 6. Payroll Claims Indexes
 -- ============================================================
 
--- Fast lookup by status
+-- Time-based lookup (schema has claimed_at; no status column)
 CREATE INDEX IF NOT EXISTS idx_payroll_claims_status 
-ON payroll_claims(status);
+ON payroll_claims(claimed_at DESC);
 
 -- Fast lookup by employee
 CREATE INDEX IF NOT EXISTS idx_payroll_claims_employee 
 ON payroll_claims(employee_id);
 
--- Composite index for employee claims
+-- Composite index for employee claim history
 CREATE INDEX IF NOT EXISTS idx_payroll_claims_employee_status 
-ON payroll_claims(employee_id, status);
+ON payroll_claims(employee_id, claimed_at DESC);
 
 -- Time-based queries for payroll reports
 CREATE INDEX IF NOT EXISTS idx_payroll_claims_updated_at 
-ON payroll_claims(updated_at);
+ON payroll_claims(claimed_at DESC);
 
--- Composite index for payroll period claims
+-- Composite index for payroll period claim history
 CREATE INDEX IF NOT EXISTS idx_payroll_claims_period_status 
-ON payroll_claims(payroll_period_id, status);
+ON payroll_claims(payroll_period_id, claimed_at DESC);
 
 -- ============================================================
 -- 7. Webhook Subscriptions & Deliveries Indexes
@@ -192,9 +192,9 @@ ON webhook_deliveries(event_type);
 CREATE INDEX IF NOT EXISTS idx_audit_logs_action_timestamp 
 ON audit_logs(action, timestamp DESC);
 
--- Fast lookup by actor
+-- Fast lookup by actor (schema column is actor_address)
 CREATE INDEX IF NOT EXISTS idx_audit_logs_actor_timestamp 
-ON audit_logs(actor_stellar_address, timestamp DESC);
+ON audit_logs(actor_address, timestamp DESC);
 
 -- ============================================================
 -- 9. Outbox Pattern Indexes
@@ -217,10 +217,9 @@ ON outbox(event_type, processed_at);
 CREATE INDEX IF NOT EXISTS idx_exchange_rates_base_target 
 ON exchange_rates(base_currency, target_currency);
 
--- Valid rates only
+-- Valid-until lookup (partial predicate with NOW() is not allowed in index predicate)
 CREATE INDEX IF NOT EXISTS idx_exchange_rates_valid_until 
-ON exchange_rates(valid_until) 
-WHERE valid_until > NOW();
+ON exchange_rates(valid_until);
 
 -- ============================================================
 -- 11. Idempotency Keys Indexes
@@ -262,7 +261,7 @@ WHERE status = 'completed';
 -- Only index approved KYC customers
 CREATE INDEX IF NOT EXISTS idx_sep12_customers_approved 
 ON sep12_customers(created_at) 
-WHERE kyc_status = 'APPROVED';
+WHERE kyc_status = 'approved';
 
 -- ============================================================
 -- 14. Covering Indexes for Analytics Queries
@@ -278,10 +277,10 @@ CREATE INDEX IF NOT EXISTS idx_moneygram_volume
 ON moneygram_transactions(created_at DESC, status) 
 INCLUDE (crypto_amount, fiat_amount, fiat_currency);
 
--- Covering index for payroll reports
+-- Covering index for payroll reports (schema has claimed_at; no status/amount columns)
 CREATE INDEX IF NOT EXISTS idx_payroll_claims_report 
-ON payroll_claims(updated_at DESC, status) 
-INCLUDE (employee_id, amount);
+ON payroll_claims(claimed_at DESC) 
+INCLUDE (employee_id, payroll_period_id);
 
 -- ============================================================
 -- Verify Index Creation
