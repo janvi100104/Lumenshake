@@ -35,7 +35,7 @@
 | 🎯 Item | 🔗 Link / Status |
 |---------|-----------------|
 | 📜 **Smart Contract** | [`CCRD5GASTD5IQQPX2ELACIYQRTHQDPWMPFG7AWNWVRP5F6CRT2L3SEAJ`](https://stellar.expert/explorer/testnet/contract/CCRD5GASTD5IQQPX2ELACIYQRTHQDPWMPFG7AWNWVRP5F6CRT2L3SEAJ) |
-| 🌐 **Live Demo** | 🚧 Deploying to Vercel • Local: http://localhost:3000 |
+| 🌐 **Live Demo** | 🚧 Deploying to Vercel • Local: https://lumenshake.vercel.app/ |
 | 👛 **35 Wallet Addresses** | [View Below](#-verifiable-wallet-addresses) • All Verifiable on Stellar Explorer |
 | 📊 **Metrics API** | `GET /api/metrics/dashboard` (auth required) |
 | 📈 **Monitoring** | Prometheus: http://localhost:9090 • Grafana: http://localhost:3001 |

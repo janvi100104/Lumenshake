@@ -1,0 +1,207 @@
+name: LumenShake CI/CD
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lumenshake-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "20"
+
+jobs:
+  backend-ci:
+    name: Backend CI
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: lumenshake
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d lumenshake"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_NAME: lumenshake
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      NODE_ENV: test
+      PORT: 4000
+      FRONTEND_URL: http://localhost:3000
+      STELLAR_NETWORK: testnet
+      HOME_DOMAIN: localhost:4000
+      WEB_AUTH_DOMAIN: localhost:4000
+      JWT_SECRET: ci-jwt-secret
+      PIN_ENCRYPTION_KEY: ci-pin-encryption-key
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        run: npm ci
+
+      - name: Syntax check backend JS
+        run: |
+          find src scripts tests -name "*.js" -print0 | xargs -0 -n1 node --check
+
+      - name: Run database migrations
+        run: npm run migrate
+
+      - name: Backend smoke checks
+        run: |
+          set -euo pipefail
+
+          npm start > /tmp/lumenshake-backend.log 2>&1 &
+          BACKEND_PID=$!
+
+          cleanup() {
+            kill "$BACKEND_PID" >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+
+          READY=0
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4000/health >/dev/null; then
+              READY=1
+              break
+            fi
+            sleep 2
+          done
+
+          if [ "$READY" -ne 1 ]; then
+            echo "Backend failed to become healthy"
+            cat /tmp/lumenshake-backend.log
+            exit 1
+          fi
+
+          curl -fsS http://127.0.0.1:4000/health
+          curl -fsS http://127.0.0.1:4000/metrics | grep -q "http_requests_total"
+          curl -fsS "http://127.0.0.1:4000/api/moneygram/exchange-rate?base=USDC&target=MXN" | grep -q '"success":true'
+
+  web-ci:
+    name: Web CI
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install web dependencies
+        run: npm ci
+
+      - name: Lint web
+        run: npm run lint
+
+      - name: Build web
+        run: npm run build
+
+  contracts-ci:
+    name: Smart Contracts CI
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust artifacts
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            contracts/payroll_contract
+            contracts/test_usdc
+
+      - name: Test payroll contract
+        run: cargo test --manifest-path contracts/payroll_contract/Cargo.toml --locked
+
+      - name: Test test_usdc contract
+        run: cargo test --manifest-path contracts/test_usdc/Cargo.toml --locked
+
+  cd-publish-backend-image:
+    name: CD Publish Backend Image
+    runs-on: ubuntu-latest
+    needs:
+      - backend-ci
+      - web-ci
+      - contracts-ci
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build image name
+        id: image
+        run: echo "name=ghcr.io/${GITHUB_REPOSITORY,,}/backend" >> "$GITHUB_OUTPUT"
+
+      - name: Extract image metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ steps.image.outputs.name }}
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix=sha-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}

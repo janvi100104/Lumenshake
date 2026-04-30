@@ -7,7 +7,9 @@ const runMigrations = async () => {
   
   const migrationsDir = path.join(__dirname, '../../migrations');
   const migrationFiles = fs.readdirSync(migrationsDir)
-    .filter(file => file.endsWith('.sql'))
+    // Only execute versioned migrations (e.g., 001_initial_schema.sql).
+    // This avoids running ad-hoc/manual SQL helpers that may not be idempotent.
+    .filter(file => /^\d+_.*\.sql$/.test(file))
     .sort();
 
   for (const file of migrationFiles) {
