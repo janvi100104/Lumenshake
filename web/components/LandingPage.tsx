@@ -3,256 +3,476 @@
 import { useState } from 'react';
 import { useWallet } from '@/utils/wallet';
 
+type FeatureCard = {
+  title: string;
+  description: string;
+  chip: string;
+};
+
+type Step = {
+  title: string;
+  detail: string;
+};
+
 export default function LandingPage() {
   const wallet = useWallet();
-  const [openFAQ, setOpenFAQ] = useState<number | null>(null);
+  const [openFAQ, setOpenFAQ] = useState<number | null>(0);
+
+  const navItems = ['Home', 'Features', 'Flow', 'FAQ'];
+
+  const members = ['AR', 'MK', 'LN', 'ST'];
+
+  const featureCards: FeatureCard[] = [
+    {
+      title: 'Invest in Growth',
+      description:
+        'Run payroll and treasury from one place with predictable USDC rails, no settlement lag, and clear audit trails.',
+      chip: 'Stable Liquidity',
+    },
+    {
+      title: 'Fast Transactions',
+      description:
+        'Set recurring payouts, trigger one-off bonuses, and complete cross-border transfers in under five seconds.',
+      chip: '< 5s Settlement',
+    },
+    {
+      title: 'Enterprise Security',
+      description:
+        'Layer SEP-10 auth, compliance checks, and webhook tracking while keeping every transfer visible and controllable.',
+      chip: 'Compliance Ready',
+    },
+  ];
+
+  const steps: Step[] = [
+    {
+      title: 'Connect Wallet',
+      detail:
+        'Sign in with Freighter to initialize your payroll treasury and assign admin controls.',
+    },
+    {
+      title: 'Configure Payroll',
+      detail:
+        'Upload team data, define cycles, and map payout routes for each region in minutes.',
+    },
+    {
+      title: 'Pay & Cash Out',
+      detail:
+        'Release USDC salaries and let workers cash out locally through integrated MoneyGram rails.',
+    },
+  ];
 
   const faqs = [
     {
       question: 'How are workers paid in local fiat?',
-      answer: 'Workers receive USDC on their wallets, which can be cashed-out via a network of over 550K+ locations globally using the SEP-31 protocol.',
+      answer:
+        'Employees receive USDC on Stellar wallets and can cash out locally through supported MoneyGram points. That gives teams crypto-speed settlement without forcing them to stay in crypto.',
     },
     {
       question: 'What about compliance and security?',
-      answer: 'LumenShake uses industry-standard SEP-10 authentication and is built on a framework that integrates KYC/AML verification. SEP-10 with advanced monitoring and reporting.',
+      answer:
+        'LumenShake uses SEP-10 authentication, KYC-aware workflows, auditable transaction logs, and role-based controls to keep operations secure and regulator-ready.',
     },
     {
-      question: 'Is the platform compliant for international use?',
-      answer: 'The Stellar network and SEP-31 facilitate international compliance. Integrated monitoring tools and comprehensive logging help ensure operational compliance.',
+      question: 'Can we integrate this with HR or finance tools?',
+      answer:
+        'Yes. API and webhook hooks are designed for payroll sync, status updates, and reconciliation pipelines with your existing HRIS or accounting stack.',
     },
     {
-      question: 'How does it integrate with existing systems?',
-      answer: 'Full API access and robust webhook integrations are provided for real-time data sync with your HR, accounting, or internal systems.',
+      question: 'Does this support recurring global payroll cycles?',
+      answer:
+        'Yes. You can configure recurring cycles, auto-run payouts, and monitor every batch in one dashboard with fast final settlement.',
     },
-  ];
-
-  const features = [
-    'Payroll Periods & Automated Distributions',
-    'Instant Payments (<5s) in USDC',
-    'Cross-Border Payments (SEP-31)',
-    'Worker Cash-Out to local fiat (MoneyGram)',
   ];
 
   const toggleFAQ = (index: number) => {
     setOpenFAQ(openFAQ === index ? null : index);
   };
 
+  const walletAddressLabel = wallet.address
+    ? `${wallet.address.slice(0, 6)}...${wallet.address.slice(-4)}`
+    : 'Wallet Connected';
+
   return (
-    <div className="min-h-screen bg-[#0a0e17] text-white">
-      {/* Header */}
-      <header className="relative overflow-hidden">
-        {/* Background gradient */}
-        <div className="absolute inset-0 bg-gradient-to-b from-blue-900/20 to-transparent"></div>
-        
-        <div className="relative max-w-7xl mx-auto px-6 py-12">
-          {/* Top bar */}
-          <div className="flex items-center justify-between mb-16">
-            <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
-                LumenShake
-              </h1>
-              <p className="text-gray-400 text-sm mt-2">
-                Global payroll using USDC stablecoins. Fast. Compliant. Local Cash-Out.
-              </p>
+    <div className="relative min-h-screen overflow-hidden bg-[#060b18] text-slate-100">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute left-[-180px] top-[-220px] h-[520px] w-[520px] rounded-full bg-[radial-gradient(circle,_rgba(56,189,248,0.34)_0%,_rgba(56,189,248,0)_70%)] blur-2xl" />
+        <div className="absolute right-[-160px] top-[120px] h-[470px] w-[470px] rounded-full bg-[radial-gradient(circle,_rgba(20,184,166,0.3)_0%,_rgba(20,184,166,0)_68%)] blur-3xl animate-pulse-glow" />
+        <div className="absolute bottom-[-280px] left-1/2 h-[640px] w-[640px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,_rgba(59,130,246,0.24)_0%,_rgba(59,130,246,0)_72%)] blur-3xl" />
+        <div className="absolute inset-0 opacity-35 [background:linear-gradient(to_right,rgba(148,163,184,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.08)_1px,transparent_1px)] [background-size:54px_54px]" />
+      </div>
+
+      <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-col px-6 pb-14 pt-8 md:pt-10">
+        <header className="mb-16 rounded-2xl border border-white/10 bg-white/[0.035] px-5 py-4 backdrop-blur-xl md:px-8">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="grid h-12 w-12 place-items-center rounded-2xl border border-sky-300/30 bg-gradient-to-br from-sky-400/25 via-cyan-300/10 to-transparent shadow-[0_0_45px_-22px_rgba(56,189,248,1)]">
+                <svg className="h-6 w-6 text-sky-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <path d="M12 2l6.5 4v12L12 22 5.5 18V6L12 2z" />
+                  <path d="M12 2v20M5.5 6 12 10l6.5-4M5.5 18 12 14l6.5 4" />
+                </svg>
+              </div>
+              <div>
+                <p className="font-display text-xl font-semibold tracking-wide text-white">LumenShake</p>
+                <p className="text-xs text-slate-300/75">Global payroll powered by Stellar + USDC</p>
+              </div>
             </div>
-            
-            {/* Connect Wallet Button */}
+
+            <nav className="hidden items-center gap-8 text-sm text-slate-200/85 md:flex">
+              {navItems.map((item) => (
+                <a
+                  key={item}
+                  href={`#${item.toLowerCase()}`}
+                  className="transition-colors hover:text-cyan-300"
+                >
+                  {item}
+                </a>
+              ))}
+            </nav>
+
             <button
               onClick={wallet.connectWallet}
               disabled={wallet.loading || wallet.isConnected}
-              className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+              className={`inline-flex h-11 items-center justify-center rounded-xl border px-5 text-sm font-semibold transition-all ${
                 wallet.isConnected
-                  ? 'bg-green-600/20 border border-green-500/50 text-green-400'
-                  : 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/30'
+                  ? 'cursor-default border-emerald-300/35 bg-emerald-500/15 text-emerald-200'
+                  : 'border-cyan-300/45 bg-[linear-gradient(120deg,rgba(14,116,144,0.9),rgba(2,132,199,0.75),rgba(20,184,166,0.7))] text-white shadow-[0_18px_45px_-20px_rgba(34,211,238,0.95)] hover:-translate-y-0.5 hover:shadow-[0_24px_55px_-20px_rgba(34,211,238,0.95)]'
               }`}
             >
               {wallet.loading ? (
-                <span className="flex items-center space-x-2">
-                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                <span className="inline-flex items-center gap-2">
+                  <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="10" className="opacity-30" stroke="currentColor" strokeWidth="4" />
+                    <path d="M4 12a8 8 0 0 1 8-8" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
                   </svg>
-                  <span>Connecting...</span>
+                  Connecting...
                 </span>
               ) : wallet.isConnected ? (
-                <span className="flex items-center space-x-2">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span>{wallet.address?.slice(0, 6)}...{wallet.address?.slice(-4)}</span>
-                </span>
+                walletAddressLabel
               ) : (
-                <span className="flex items-center space-x-2">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                  <span>CONNECT WALLET</span>
-                </span>
+                'Connect Wallet'
               )}
             </button>
           </div>
+        </header>
 
-          {/* Integration badges */}
-          <div className="flex items-center space-x-4 mb-8">
-            <div className="flex items-center space-x-2 text-gray-400 text-sm">
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
-              </svg>
-              <span>Stellar</span>
-            </div>
-            <div className="flex items-center space-x-2 text-gray-400 text-sm">
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
-              </svg>
-              <span>MoneyGram Integration</span>
-            </div>
-          </div>
-        </div>
-      </header>
+        <main className="space-y-24">
+          <section id="home" className="grid items-center gap-12 lg:grid-cols-[1.08fr_0.92fr]">
+            <div>
+              <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-cyan-300/30 bg-cyan-300/10 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.22em] text-cyan-200">
+                Secure Cross-Border Payroll
+              </p>
+              <h1 className="font-display text-4xl font-semibold leading-tight text-white sm:text-5xl lg:text-6xl">
+                Explore the Next Wave of
+                <span className="mt-1 block bg-[linear-gradient(120deg,#93c5fd,#67e8f9,#2dd4bf)] bg-clip-text text-transparent animate-shimmer">
+                  Payroll Infrastructure
+                </span>
+              </h1>
+              <p className="mt-6 max-w-xl text-lg leading-relaxed text-slate-300">
+                Manage payouts, automate compliance, and enable local cash-out with a cinematic dashboard built for modern global teams.
+              </p>
 
-      {/* Hero Section */}
-      <section className="max-w-7xl mx-auto px-6 py-16">
-        <div className="text-center mb-20">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            Automate Payroll. Enable Employees.
-          </h2>
-        </div>
-
-        {/* Utility Spotlight */}
-        <div className="grid md:grid-cols-2 gap-12 items-center mb-24">
-          {/* Left - Abstract network graphic */}
-          <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-cyan-600/20 rounded-full blur-3xl"></div>
-            <svg className="relative w-full h-64" viewBox="0 0 400 200" fill="none">
-              {/* Network nodes and connections */}
-              <path d="M50 100 Q100 50 150 100 T250 100 T350 100" stroke="url(#gradient1)" strokeWidth="2" fill="none" opacity="0.6"/>
-              <path d="M50 120 Q100 70 150 120 T250 120 T350 120" stroke="url(#gradient2)" strokeWidth="2" fill="none" opacity="0.4"/>
-              <path d="M50 80 Q100 30 150 80 T250 80 T350 80" stroke="url(#gradient3)" strokeWidth="2" fill="none" opacity="0.5"/>
-              
-              {/* Nodes */}
-              <circle cx="50" cy="100" r="4" fill="#3B82F6" opacity="0.8"/>
-              <circle cx="150" cy="100" r="4" fill="#06B6D4" opacity="0.8"/>
-              <circle cx="250" cy="100" r="4" fill="#3B82F6" opacity="0.8"/>
-              <circle cx="350" cy="100" r="4" fill="#06B6D4" opacity="0.8"/>
-              
-              <defs>
-                <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#3B82F6" />
-                  <stop offset="100%" stopColor="#06B6D4" />
-                </linearGradient>
-                <linearGradient id="gradient2" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#06B6D4" />
-                  <stop offset="100%" stopColor="#3B82F6" />
-                </linearGradient>
-                <linearGradient id="gradient3" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#3B82F6" />
-                  <stop offset="100%" stopColor="#06B6D4" />
-                </linearGradient>
-              </defs>
-            </svg>
-          </div>
-
-          {/* Right - Features */}
-          <div>
-            <div className="text-xs text-gray-500 uppercase tracking-wider mb-2">Utility Spotlight</div>
-            <h3 className="text-3xl font-bold text-white mb-6">
-              Seamless Global USDC Payments
-            </h3>
-            <ul className="space-y-3">
-              {features.map((feature, index) => (
-                <li key={index} className="flex items-start space-x-3">
-                  <svg className="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-300">{feature}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ Section */}
-      <section className="max-w-7xl mx-auto px-6 py-16">
-        <div className="mb-12">
-          <div className="text-xs text-gray-500 uppercase tracking-wider mb-2">FAQ</div>
-          <h3 className="text-3xl font-bold text-white mb-2">
-            Frequently Asked Questions
-          </h3>
-          <p className="text-gray-400">Common Questions About LumenShake</p>
-        </div>
-
-        <div className="grid md:grid-cols-2 gap-6">
-          {faqs.map((faq, index) => (
-            <div
-              key={index}
-              className="bg-[#1a1f2e] border border-gray-800 rounded-xl overflow-hidden hover:border-blue-500/50 transition-colors"
-            >
-              <button
-                onClick={() => toggleFAQ(index)}
-                className="w-full px-6 py-5 flex items-center justify-between text-left"
-              >
-                <span className="text-white font-medium pr-4">{faq.question}</span>
-                <svg
-                  className={`w-5 h-5 text-blue-500 flex-shrink-0 transition-transform ${
-                    openFAQ === index ? 'rotate-180' : ''
+              <div className="mt-8 flex flex-wrap items-center gap-4">
+                <button
+                  onClick={wallet.connectWallet}
+                  disabled={wallet.loading || wallet.isConnected}
+                  className={`inline-flex h-12 items-center justify-center rounded-xl px-6 text-sm font-semibold transition-all ${
+                    wallet.isConnected
+                      ? 'cursor-default border border-emerald-300/35 bg-emerald-500/15 text-emerald-200'
+                      : 'bg-[linear-gradient(120deg,#0284c7,#06b6d4,#14b8a6)] text-white shadow-[0_22px_50px_-22px_rgba(6,182,212,1)] hover:-translate-y-0.5'
                   }`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              
-              {openFAQ === index && (
-                <div className="px-6 pb-5">
-                  <p className="text-gray-400 text-sm leading-relaxed">{faq.answer}</p>
+                  {wallet.isConnected ? 'Wallet Connected' : 'Launch Payroll'}
+                </button>
+                <a
+                  href="#flow"
+                  className="inline-flex h-12 items-center justify-center rounded-xl border border-slate-300/30 bg-white/[0.04] px-6 text-sm font-semibold text-slate-100 transition-colors hover:border-cyan-300/50 hover:text-cyan-200"
+                >
+                  See Flow
+                </a>
+              </div>
+
+              <div className="mt-9 flex flex-wrap items-center gap-5">
+                <p className="text-sm text-slate-300">Trusted by payroll operators</p>
+                <div className="flex -space-x-3">
+                  {members.map((initial, index) => (
+                    <div
+                      key={initial}
+                      className="grid h-11 w-11 place-items-center rounded-full border-2 border-[#060b18] bg-[linear-gradient(135deg,rgba(6,182,212,0.6),rgba(14,116,144,0.82))] text-xs font-semibold text-white shadow-[0_0_0_1px_rgba(125,211,252,0.45)]"
+                      style={{ zIndex: members.length - index }}
+                    >
+                      {initial}
+                    </div>
+                  ))}
                 </div>
+              </div>
+
+              {!wallet.freighterInstalled && (
+                <p className="mt-6 text-sm text-amber-200/90">
+                  Freighter wallet not detected yet. Install or enable it, then reconnect.
+                </p>
               )}
             </div>
-          ))}
-        </div>
-      </section>
 
-      {/* Footer CTA */}
-      <section className="max-w-7xl mx-auto px-6 py-16">
-        <div className="bg-gradient-to-r from-blue-600/20 to-cyan-600/20 border border-blue-500/30 rounded-2xl p-12 text-center">
-          <h3 className="text-2xl font-bold text-white mb-4">
-            Ready to automate your global payroll?
-          </h3>
-          <p className="text-gray-400 mb-8">
-            Connect your wallet and get started in minutes
-          </p>
-          <button
-            onClick={wallet.connectWallet}
-            disabled={wallet.loading || wallet.isConnected}
-            className={`px-8 py-4 rounded-lg font-semibold text-lg transition-all ${
-              wallet.isConnected
-                ? 'bg-green-600/20 border border-green-500/50 text-green-400'
-                : 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/30'
-            }`}
-          >
-            {wallet.isConnected ? '✓ Wallet Connected' : 'Connect Wallet to Start'}
-          </button>
-        </div>
-      </section>
+            <div className="relative mx-auto w-full max-w-[520px]">
+              <div className="absolute inset-0 rounded-[2.5rem] bg-[radial-gradient(circle,_rgba(6,182,212,0.22)_0%,_rgba(6,182,212,0)_70%)] blur-2xl" />
+              <div className="relative rounded-[2.5rem] border border-white/12 bg-white/[0.045] p-6 shadow-[0_50px_100px_-55px_rgba(56,189,248,1)] backdrop-blur-xl">
+                <svg viewBox="0 0 500 440" className="w-full animate-float" role="img" aria-label="LumenShake payroll crystal">
+                  <defs>
+                    <linearGradient id="crystalMain" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stopColor="#cffafe" />
+                      <stop offset="50%" stopColor="#38bdf8" />
+                      <stop offset="100%" stopColor="#0f172a" />
+                    </linearGradient>
+                    <linearGradient id="crystalBase" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#164e63" />
+                      <stop offset="100%" stopColor="#0b1327" />
+                    </linearGradient>
+                    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                      <feGaussianBlur stdDeviation="10" result="blur" />
+                      <feMerge>
+                        <feMergeNode in="blur" />
+                        <feMergeNode in="SourceGraphic" />
+                      </feMerge>
+                    </filter>
+                  </defs>
 
-      {/* Footer */}
-      <footer className="border-t border-gray-800 mt-16">
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
-            <div className="text-gray-500 text-sm">
-              © 2024 LumenShake. Built on Stellar Network.
+                  <polygon points="250,24 336,168 164,168" fill="url(#crystalMain)" filter="url(#glow)" />
+                  <polygon points="122,170 378,170 420,298 80,298" fill="url(#crystalBase)" stroke="#7dd3fc" strokeWidth="2" />
+                  <polygon points="152,186 348,186 372,274 128,274" fill="rgba(56,189,248,0.23)" stroke="rgba(186,230,253,0.8)" strokeWidth="1.5" />
+                  <text
+                    x="250"
+                    y="245"
+                    textAnchor="middle"
+                    fill="#e0f2fe"
+                    style={{ fontSize: '58px', fontWeight: 700, letterSpacing: '2px' }}
+                    className="font-display"
+                  >
+                    USDC
+                  </text>
+                  <circle cx="110" cy="333" r="10" fill="#38bdf8" opacity="0.75" />
+                  <circle cx="390" cy="325" r="7" fill="#5eead4" opacity="0.7" />
+                  <path d="M56 338 C118 330, 172 352, 236 344" stroke="#67e8f9" strokeWidth="2" fill="none" opacity="0.5" />
+                  <path d="M240 344 C304 336, 356 356, 442 340" stroke="#93c5fd" strokeWidth="2" fill="none" opacity="0.55" />
+                </svg>
+              </div>
             </div>
-            <div className="flex items-center space-x-6 text-sm text-gray-500">
-              <a href="#" className="hover:text-white transition">Documentation</a>
-              <a href="#" className="hover:text-white transition">API</a>
-              <a href="#" className="hover:text-white transition">Support</a>
+          </section>
+
+          <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              { value: '550k+', label: 'Cash-out touchpoints' },
+              { value: '24/7', label: 'Support coverage' },
+              { value: '<5s', label: 'Average settlement' },
+              { value: '99.99%', label: 'Payroll execution uptime' },
+            ].map((stat) => (
+              <article
+                key={stat.label}
+                className="rounded-2xl border border-white/12 bg-white/[0.03] p-5 backdrop-blur-xl transition-transform hover:-translate-y-1"
+              >
+                <p className="font-display text-3xl font-semibold text-cyan-200">{stat.value}</p>
+                <p className="mt-1 text-sm text-slate-300">{stat.label}</p>
+              </article>
+            ))}
+          </section>
+
+          <section id="features" className="space-y-8">
+            <div className="text-center">
+              <p className="text-xs uppercase tracking-[0.24em] text-cyan-200/80">Secure and Private</p>
+              <h2 className="mt-3 font-display text-3xl font-semibold text-white md:text-4xl">
+                Built for Real Payroll Pressure
+              </h2>
+              <p className="mx-auto mt-3 max-w-2xl text-slate-300">
+                Every surface is designed to move funds quickly, protect operations, and give finance teams confidence from day one.
+              </p>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-3">
+              {featureCards.map((card, index) => (
+                <article
+                  key={card.title}
+                  className="group relative rounded-3xl border border-white/12 bg-[linear-gradient(165deg,rgba(15,23,42,0.94),rgba(12,18,36,0.85))] p-6 shadow-[0_25px_70px_-45px_rgba(56,189,248,0.9)] transition-all hover:-translate-y-1.5 hover:border-cyan-300/35"
+                >
+                  <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-xl border border-cyan-200/35 bg-cyan-300/15 text-cyan-100">
+                    {index === 0 && (
+                      <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                        <path d="M12 3v18M7 8h10M7 16h10" />
+                        <path d="M5 12h14" />
+                      </svg>
+                    )}
+                    {index === 1 && (
+                      <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                        <path d="M4 12h16" />
+                        <path d="m13 5 7 7-7 7" />
+                      </svg>
+                    )}
+                    {index === 2 && (
+                      <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                        <path d="M12 3 5 7v5c0 5 3.4 8.2 7 9 3.6-.8 7-4 7-9V7l-7-4Z" />
+                      </svg>
+                    )}
+                  </div>
+
+                  <h3 className="font-display text-2xl font-semibold text-white">{card.title}</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-slate-300">{card.description}</p>
+                  <p className="mt-5 text-sm font-semibold text-cyan-200">{card.chip}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section className="grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+            <div>
+              <h2 className="font-display text-3xl font-semibold leading-tight text-white sm:text-4xl">
+                Trade with confidence and run payroll from one resilient platform.
+              </h2>
+              <p className="mt-4 max-w-xl text-lg leading-relaxed text-slate-300">
+                Follow live transfer status, automate treasury routines, and keep every stakeholder informed with clear operational telemetry.
+              </p>
+
+              <ul className="mt-7 space-y-3 text-slate-200">
+                {[
+                  'Dedicated payroll orchestration with recurring schedules',
+                  'Live settlement states, retries, and exception visibility',
+                  'Cash-out intelligence for local currency accessibility',
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-3">
+                    <span className="mt-1 h-2.5 w-2.5 rounded-full bg-cyan-300" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <a
+                href="#flow"
+                className="mt-8 inline-flex h-12 items-center justify-center rounded-xl border border-cyan-300/45 bg-cyan-300/10 px-6 text-sm font-semibold text-cyan-100 transition-colors hover:bg-cyan-300/20"
+              >
+                Explore Flow
+              </a>
+            </div>
+
+            <div className="relative mx-auto w-full max-w-[460px] rounded-[2rem] border border-white/15 bg-white/[0.05] p-8 backdrop-blur-xl">
+              <div className="absolute -right-9 -top-8 h-24 w-24 rounded-2xl border border-cyan-300/40 bg-cyan-300/20 blur-[1px]" />
+              <div className="absolute -bottom-9 -left-8 h-28 w-28 rounded-3xl border border-sky-300/35 bg-sky-300/20" />
+
+              <div className="relative grid grid-cols-3 gap-4">
+                {[72, 108, 142, 84, 126, 102].map((height, index) => (
+                  <div
+                    key={height + index}
+                    className="rounded-xl border border-cyan-300/30 bg-[linear-gradient(180deg,rgba(103,232,249,0.65),rgba(30,64,175,0.25))]"
+                    style={{ height: `${height}px` }}
+                  />
+                ))}
+              </div>
+
+              <div className="mt-6 rounded-2xl border border-cyan-200/25 bg-[#081325]/95 p-4">
+                <p className="text-xs uppercase tracking-[0.18em] text-cyan-200/70">Live batch</p>
+                <p className="mt-2 font-display text-2xl font-semibold text-white">USDC 148,290</p>
+                <p className="mt-1 text-sm text-slate-300">28 salaries processing now</p>
+              </div>
+            </div>
+          </section>
+
+          <section id="flow" className="space-y-8">
+            <div>
+              <p className="text-xs uppercase tracking-[0.24em] text-cyan-200/80">How it works</p>
+              <h2 className="mt-3 font-display text-3xl font-semibold text-white md:text-4xl">Simple, Fast, Controlled</h2>
+            </div>
+
+            <div className="grid gap-5 md:grid-cols-3">
+              {steps.map((step, index) => (
+                <article
+                  key={step.title}
+                  className="rounded-2xl border border-white/12 bg-white/[0.03] p-6 backdrop-blur-xl"
+                >
+                  <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-cyan-300/20 font-display text-sm font-semibold text-cyan-100">
+                    0{index + 1}
+                  </span>
+                  <h3 className="mt-4 font-display text-xl font-semibold text-white">{step.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-300">{step.detail}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section id="faq" className="space-y-8">
+            <div>
+              <p className="text-xs uppercase tracking-[0.24em] text-cyan-200/80">FAQ</p>
+              <h2 className="mt-3 font-display text-3xl font-semibold text-white md:text-4xl">Answers Before You Deploy</h2>
+            </div>
+
+            <div className="grid gap-5 md:grid-cols-2">
+              {faqs.map((faq, index) => (
+                <article
+                  key={faq.question}
+                  className="rounded-2xl border border-white/12 bg-[#0b1428]/90 p-1 transition-colors hover:border-cyan-300/40"
+                >
+                  <button
+                    onClick={() => toggleFAQ(index)}
+                    className="flex w-full items-center justify-between gap-4 rounded-xl px-5 py-4 text-left"
+                  >
+                    <span className="font-medium text-white">{faq.question}</span>
+                    <svg
+                      className={`h-5 w-5 flex-shrink-0 text-cyan-200 transition-transform ${
+                        openFAQ === index ? 'rotate-180' : ''
+                      }`}
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="m6 9 6 6 6-6" />
+                    </svg>
+                  </button>
+
+                  {openFAQ === index && (
+                    <div className="px-5 pb-5">
+                      <p className="text-sm leading-relaxed text-slate-300">{faq.answer}</p>
+                    </div>
+                  )}
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section className="rounded-3xl border border-cyan-300/25 bg-[linear-gradient(115deg,rgba(8,47,73,0.86),rgba(8,37,56,0.86),rgba(15,23,42,0.9))] px-6 py-12 text-center shadow-[0_35px_90px_-40px_rgba(6,182,212,0.95)] md:px-12">
+            <p className="text-sm uppercase tracking-[0.24em] text-cyan-200/80">Ready to launch</p>
+            <h2 className="mt-4 font-display text-3xl font-semibold text-white md:text-4xl">
+              Build a Payroll Experience Teams Actually Trust
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-slate-200/90">
+              Connect your wallet, configure your payout logic, and ship global payroll with the speed and transparency modern teams expect.
+            </p>
+            <button
+              onClick={wallet.connectWallet}
+              disabled={wallet.loading || wallet.isConnected}
+              className={`mt-8 inline-flex h-12 items-center justify-center rounded-xl px-7 text-sm font-semibold transition-all ${
+                wallet.isConnected
+                  ? 'cursor-default border border-emerald-300/35 bg-emerald-500/15 text-emerald-200'
+                  : 'bg-white text-slate-900 shadow-[0_24px_45px_-22px_rgba(255,255,255,0.65)] hover:-translate-y-0.5'
+              }`}
+            >
+              {wallet.isConnected ? walletAddressLabel : 'Connect Wallet to Start'}
+            </button>
+          </section>
+        </main>
+
+        <footer className="mt-16 border-t border-white/10 pt-7 text-sm text-slate-400">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <p>© 2026 LumenShake. Designed for global payroll execution.</p>
+            <div className="flex items-center gap-5">
+              <a href="#features" className="transition-colors hover:text-cyan-200">
+                Features
+              </a>
+              <a href="#flow" className="transition-colors hover:text-cyan-200">
+                Flow
+              </a>
+              <a href="#faq" className="transition-colors hover:text-cyan-200">
+                Support
+              </a>
             </div>
           </div>
-        </div>
-      </footer>
+        </footer>
+      </div>
     </div>
   );
 }
