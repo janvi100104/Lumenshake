@@ -19,6 +19,7 @@
 [![Monitoring](https://img.shields.io/badge/Monitoring-Active-blue?style=flat-square)](docs/TASK11_MONITORING_COMPLETE.md)
 [![Docs](https://img.shields.io/badge/Docs-Complete-0a66c2?style=flat-square)](docs/TECHNICAL_DOCUMENTATION.md)
 [![Commits](https://img.shields.io/badge/Commits-23%2B-yellow?style=flat-square)](https://github.com/janvi100104/LumenShake/commits/main)
+[![CI](https://github.com/janvi100104/LumenShake/actions/workflows/CI.yaml/badge.svg)](https://github.com/janvi100104/LumenShake/actions/workflows/CI.yaml)
 
 ---
 
@@ -39,10 +40,43 @@
 | 👛 **35 Wallet Addresses** | [View Below](#-verifiable-wallet-addresses) • All Verifiable on Stellar Explorer |
 | 📊 **Metrics API** | `GET /api/metrics/dashboard` (auth required) |
 | 📈 **Monitoring** | Prometheus: http://localhost:9090 • Grafana: http://localhost:3001 |
+| 🔁 **CI/CD Pipeline** | [Workflow](.github/workflows/CI.yaml) • [Setup Guide](CI_CD_SETUP.md) |
+| 🖼️ **Demo Screenshots** | [UI Gallery + Twitter Post](#-demo-ui-gallery) |
 | 📝 **Feedback Form** | [Google Form](https://forms.gle/Jgji7Pe1AiTKJXEi6) |
 | 📊 **Feedback Data** | [Google Sheet](https://docs.google.com/spreadsheets/d/1PsHztWKXBd4vVPzIIuzmMXyfw2eG8goRqEGx3QfPeAw/edit?resourcekey#gid=1715253295) • [Excel Export](https://docs.google.com/spreadsheets/d/1PsHztWKXBd4vVPzIIuzmMXyfw2eG8goRqEGx3QfPeAw/export?format=xlsx) |
 
 </div>
+
+---
+
+## 🔁 CI/CD Pipeline
+
+LumenShake includes a production-oriented GitHub Actions pipeline.
+
+- **Workflow file:** `.github/workflows/CI.yaml`
+- **CI triggers:** Pull requests to `main`, pushes to `main`, and manual dispatch
+- **Backend CI:** dependency install, migration run, and API smoke checks
+- **Web CI:** lint + production build checks
+- **Contracts CI:** Rust `cargo test` on both smart contracts
+- **CD:** on `main` push, backend Docker image is published to GHCR
+
+**Setup & branch protection checklist:** [CI_CD_SETUP.md](CI_CD_SETUP.md)
+
+---
+
+## 🖼️ Demo UI Gallery
+
+| Landing Page | Overview |
+|---|---|
+| ![Landing Page](demo/LandingPage.png) | ![Overview](demo/Overview.png) |
+| Payroll | Team |
+| ![Payroll](demo/Payroll.png) | ![Team](demo/Team.png) |
+| Ledger | CashOut |
+| ![Ledger](demo/Ledger.png) | ![CashOut](demo/CashOut.png) |
+
+### 🐦 Twitter Post
+
+![Twitter Post](demo/TwitterPost.png)
 
 ---
 
@@ -402,6 +436,7 @@ cd monitoring
 | 🧪 **Testing Guide** | [TESTING_GUIDE.md](docs/TESTING_GUIDE.md) | Test procedures |
 | 🔧 **Operations Runbook** | [OPERATIONS_RUNBOOK.md](docs/OPERATIONS_RUNBOOK.md) | Production operations |
 | 🚀 **Deployment Guide** | [DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md) | Deploy to Vercel/Heroku |
+| 🔁 **CI/CD Setup** | [CI_CD_SETUP.md](CI_CD_SETUP.md) | Workflow, checks, GHCR publish setup |
 | 🔒 **Security Audit** | [TASK10_SECURITY_AUDIT_COMPLETE.md](docs/TASK10_SECURITY_AUDIT_COMPLETE.md) | 40/40 checks passed |
 | 📊 **Monitoring** | [TASK11_MONITORING_COMPLETE.md](docs/TASK11_MONITORING_COMPLETE.md) | Prometheus/Grafana setup |
 | 📈 **Data Indexing** | [TASK12_INDEXING_COMPLETE.md](docs/TASK12_INDEXING_COMPLETE.md) | 39 indexes, 40-66x faster |
