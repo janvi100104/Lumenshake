@@ -14,11 +14,11 @@
 [![Rust](https://img.shields.io/badge/Rust-Soroban-orange?style=flat-square&logo=rust)](https://soroban.stellar.org)
 [![Next.js](https://img.shields.io/badge/Next.js-16-000000?style=flat-square&logo=next.js)](https://nextjs.org)
 
-[![Security](https://img.shields.io/badge/Security-Audit%20Complete-brightgreen?style=flat-square)](docs/TASK10_SECURITY_AUDIT_COMPLETE.md)
-[![Wallets](https://img.shields.io/badge/Wallets-35%20Verified-blue?style=flat-square)](#-verifiable-wallet-addresses)
-[![Advanced Feature](https://img.shields.io/badge/Advanced%20Feature-SEP--24%2FSEP--31-purple?style=flat-square)](docs/SEP24_SEP31_GUIDE.md)
-[![Indexing](https://img.shields.io/badge/DB%20Indexes-39%2B-orange?style=flat-square)](docs/TASK12_INDEXING_COMPLETE.md)
-[![Commits](https://img.shields.io/badge/Commits-22%2B-yellow?style=flat-square)](https://github.com/janvi100104/LumenShake/commits/main)
+
+[![Metrics](https://img.shields.io/badge/Metrics-Dashboard%20Live-success?style=flat-square)](docs/TASKS_9_10_COMPLETE.md)
+[![Monitoring](https://img.shields.io/badge/Monitoring-Active-blue?style=flat-square)](docs/TASK11_MONITORING_COMPLETE.md)
+[![Docs](https://img.shields.io/badge/Docs-Complete-0a66c2?style=flat-square)](docs/TECHNICAL_DOCUMENTATION.md)
+[![Commits](https://img.shields.io/badge/Commits-23%2B-yellow?style=flat-square)](https://github.com/janvi100104/LumenShake/commits/main)
 
 ---
 
@@ -28,7 +28,7 @@
 
 ---
 
-## 📋 Submission Quick Links
+## 📋 Quick Links
 
 <div align="center">
 
@@ -46,32 +46,6 @@
 
 ---
 
-## ✅ Black Belt Requirements Audit
-
-**Last Updated:** 2026-04-30
-
-<div align="center">
-
-| # | Requirement | Status | Evidence | Action Needed |
-|---|-------------|--------|----------|---------------|
-| 1 | 30+ Verified Active Users | ✅ **MET** | 35 wallets listed + DB counts (30 employers, 50 employees, 35 SEP-12 verified) | Keep refreshed |
-| 2 | Metrics Dashboard Live | ✅ **MET** | [metrics.js](backend/src/routes/metrics.js), [TASKS_9_10](docs/TASKS_9_10_COMPLETE.md) | Add hosted URL |
-| 3 | Security Checklist | ✅ **MET** | [TASK10](docs/TASK10_SECURITY_AUDIT_COMPLETE.md), [PHASE7](docs/PHASE7_SECURITY_AUDIT.md) | Periodic re-audits |
-| 4 | Monitoring Active | ✅ **MET** | [TASK11](docs/TASK11_MONITORING_COMPLETE.md), [monitoring/](monitoring/) | Add screenshot |
-| 5 | Data Indexing | ✅ **MET** | [TASK12](docs/TASK12_INDEXING_COMPLETE.md), [006_migration](backend/migrations/006_comprehensive_indexing.sql) | Monthly snapshots |
-| 6 | Full Documentation | ✅ **MET** | [TECHNICAL](docs/TECHNICAL_DOCUMENTATION.md), [USER_GUIDE](docs/USER_GUIDE.md), [API](docs/API_REFERENCE.md) | Sync with releases |
-| 7 | Community Contribution | 🚧 **PENDING** | No Twitter/X proof link yet | Publish & add URL |
-| 8 | Advanced Feature | ✅ **MET** | SEP-24/31: [GUIDE](docs/SEP24_SEP31_GUIDE.md), [sep24.js](backend/src/routes/sep24.js), [sep31.js](backend/src/routes/sep31.js) | Add demo clip |
-| 9 | 15+ Commits | ✅ **MET** | **22** commits (`git rev-list --count HEAD`) | Continue discipline |
-| 10 | 30+ Commits | 🚧 **IN PROGRESS** | **22** commits → Need **8** more | Add meaningful commits |
-| 11 | Production-Ready | 🚧 **IN PROGRESS** | Core architecture complete | Close pending items |
-
-</div>
-
-**Overall Completion:** 8/11 requirements met (73%) ✅
-
----
-
 ## 📝 User Onboarding & Feedback
 
 ### Required Fields
@@ -82,14 +56,11 @@ The feedback/onboarding form collects:
 
 ### Feedback Artifacts
 
-<div align="center">
-
 | 📋 Form | 📊 Responses |
 |---------|-------------|
 | [Google Form](https://forms.gle/Jgji7Pe1AiTKJXEi6) | [Google Sheet](https://docs.google.com/spreadsheets/d/1PsHztWKXBd4vVPzIIuzmMXyfw2eG8goRqEGx3QfPeAw/edit?resourcekey#gid=1715253295) |
 | - | [Excel Export (XLSX)](https://docs.google.com/spreadsheets/d/1PsHztWKXBd4vVPzIIuzmMXyfw2eG8goRqEGx3QfPeAw/export?format=xlsx) |
 
-</div>
 
 ---
 
@@ -147,32 +118,6 @@ The feedback/onboarding form collects:
 
 ---
 
-## 📊 Submission Checklist
-
-<div align="center">
-
-| # | Checklist Item | Status | Proof / Link |
-|---|----------------|--------|-------------|
-| 1 | Public GitHub Repository | ✅ **MET** | [github.com/janvi100104/Lumenshake](https://github.com/janvi100104/Lumenshake) |
-| 2 | README Documentation | ✅ **MET** | This file + linked docs |
-| 3 | Technical + User Docs | ✅ **MET** | [Technical](docs/TECHNICAL_DOCUMENTATION.md) • [User Guide](docs/USER_GUIDE.md) |
-| 4 | 30+ Meaningful Commits | 🚧 **PENDING** | Current: **22** → Target: **30** |
-| 5 | Demo Day Presentation | 🚧 **PENDING** | Add final deck/video link |
-| 6 | Live Demo Link (Deployed) | 🚧 **PENDING** | Local: http://localhost:3000 → Deploy to Vercel |
-| 7 | 30+ Wallet Addresses | ✅ **MET** | [Listed above](#-verifiable-wallet-addresses) |
-| 8 | Metrics Dashboard | ✅ **MET** | `GET /api/metrics/dashboard` • [TASKS_9_10](docs/TASKS_9_10_COMPLETE.md) |
-| 9 | Monitoring Screenshot | 🚧 **PENDING** | Capture from Grafana (http://localhost:3001) |
-| 10 | Security Checklist | ✅ **MET** | [TASK10](docs/TASK10_SECURITY_AUDIT_COMPLETE.md) |
-| 11 | Community Contribution | 🚧 **PENDING** | Add Twitter/X post URL |
-| 12 | Advanced Feature Proof | ✅ **MET** | [SEP24/31 Guide](docs/SEP24_SEP31_GUIDE.md) |
-| 13 | Data Indexing Evidence | ✅ **MET** | [TASK12](docs/TASK12_INDEXING_COMPLETE.md) • [006_migration](backend/migrations/006_comprehensive_indexing.sql) |
-
-</div>
-
-**Completion:** 8/13 items met (62%) 📈
-
----
-
 ## 🚀 Next-Phase Improvement Plan
 
 **Feedback-Driven Roadmap** (Based on user onboarding & product feedback themes)
@@ -191,23 +136,92 @@ The feedback/onboarding form collects:
 
 ---
 
+## 🌍 Advanced Feature Deep Dive
+
+### Cross-Border Flows (SEP-24 + SEP-31 Anchor Rails)
+
+LumenShake implements **cross-border payment rails** as the required advanced feature, combining:
+
+- **SEP-24** interactive deposit/withdrawal transaction lifecycle
+- **SEP-31** send/receive cross-border transfer workflow
+- **Webhook event delivery** for lifecycle updates and integrations
+- **KYC-aware processing** through SEP-12 customer data and validation paths
+
+#### End-to-end flow summary
+
+1. Authenticated wallet user starts a SEP-24 deposit/withdrawal or SEP-31 send flow.
+2. Transaction is persisted with status transitions for polling and reconciliation.
+3. Compliance/KYC rules are enforced via customer and payroll gate logic.
+4. Webhook delivery records are created for downstream event consumers.
+5. Monitoring and metrics capture operational health of payment processing.
+
+#### Why this satisfies advanced feature criteria
+
+- It goes beyond basic payroll transfer execution and adds **interoperable cross-border rails**.
+- It introduces **anchor-style transaction orchestration** and lifecycle tracking.
+- It integrates with compliance and observability components instead of being an isolated demo endpoint.
+
+---
+
+## 📈 Data Indexing Deep Dive
+
+The platform uses a dedicated indexing migration to support high-volume payroll, KYC, webhook, and cross-border transaction queries.
+
+#### Indexing strategy
+
+- **B-tree indexes** for standard equality/range lookups
+- **Composite indexes** for common multi-column query patterns
+- **Partial indexes** for high-selectivity operational queries
+- **BRIN indexes** for time-ordered large tables
+- **GIN indexes** for array containment queries (`event_types`)
+- **Covering indexes (`INCLUDE`)** for analytics/report queries
+
+#### Implementation proof
+
+| Artifact | Purpose |
+|---|---|
+| [backend/migrations/006_comprehensive_indexing.sql](backend/migrations/006_comprehensive_indexing.sql) | Core indexing migration with operational and analytics indexes |
+| [docs/TASK12_INDEXING_COMPLETE.md](docs/TASK12_INDEXING_COMPLETE.md) | Index design rationale and performance analysis |
+
+---
+
+## 🛡️ Detailed Security Checklist
+
+Security is implemented as layered controls across auth, API, data, and operations.
+
+#### Security controls and evidence
+
+| Area | Control | Status | Evidence |
+|---|---|---|---|
+| Authentication | SEP-10 challenge/signature verification | ✅ | [backend/src/services/sep10.js](backend/src/services/sep10.js) |
+| Replay protection | Nonce tracking (`sep10_nonces`) | ✅ | [backend/src/services/sep10.js](backend/src/services/sep10.js) |
+| Session security | JWT signing + expiration | ✅ | [backend/src/services/sep10.js](backend/src/services/sep10.js) |
+| Security headers | Helmet CSP/HSTS/frameguard + custom headers | ✅ | [backend/src/middleware/security.js](backend/src/middleware/security.js) |
+| Abuse protection | Multi-profile rate limiting (strict/standard/health) | ✅ | [backend/src/middleware/rateLimiter.js](backend/src/middleware/rateLimiter.js) |
+| Input validation | `express-validator` rules for key endpoints | ✅ | [backend/src/middleware/validation.js](backend/src/middleware/validation.js) |
+| Input sanitization | Request sanitization for body/query/params | ✅ | [backend/src/middleware/validation.js](backend/src/middleware/validation.js) |
+| SQL injection defense | Parameterized SQL queries | ✅ | [backend/src/services](backend/src/services) + [backend/src/routes](backend/src/routes) |
+| Data protection at rest | AES-256-CBC PIN encryption | ✅ | [backend/src/services/moneygram.js](backend/src/services/moneygram.js) |
+| Idempotency safety | Idempotency key cache + replay response | ✅ | [backend/src/middleware/idempotency.js](backend/src/middleware/idempotency.js) |
+| Auditability | API action logging in `audit_logs` | ✅ | [backend/src/middleware/audit.js](backend/src/middleware/audit.js) |
+| KYC enforcement | KYC gate middleware for payroll operations | ✅ | [backend/src/middleware/kycGate.js](backend/src/middleware/kycGate.js), [backend/src/routes/payroll.js](backend/src/routes/payroll.js) |
+
+---
+
 ## 🌟 Project Overview
 
 LumenShake is a **full-stack blockchain payroll platform** built on Stellar Network, enabling employers to pay workers globally using USDC stablecoins with seamless cash-out to local fiat via MoneyGram.
-
-<div align="center">
 
 ### 🏗️ Architecture
 
 | Component | Technology | Purpose |
 |-----------|-----------|---------|
-| 🎨 **Frontend** | Next.js 14+ | Landing page + 5-tab dashboard |
+| 🎨 **Frontend** | Next.js 16 | Landing page + 5-tab dashboard |
 | ⚙️ **Backend** | Express.js + Node.js | APIs, workers, metrics, compliance |
 | 📜 **Smart Contracts** | Rust + Soroban | On-chain payroll execution |
 | 📊 **Monitoring** | Prometheus + Grafana | Real-time metrics & alerting |
 | 💾 **Database** | PostgreSQL 14+ | 19 tables, 39 indexes |
 
-</div>
 
 ### ✨ Key Features
 
@@ -274,19 +288,11 @@ LumenShake/
     └── 📄 demo-verify.sh
 ```
 
-<div align="center">
-
-**Total:** ~15,000+ lines of code • 64 documentation files • 8 database migrations
-
-</div>
-
 ---
 
 ## ⚡ Quick Start
 
 ### 📋 Prerequisites
-
-<div align="center">
 
 | Requirement | Version | Link |
 |-------------|---------|------|
@@ -296,7 +302,6 @@ LumenShake/
 | Freighter Wallet | Latest | [freighter.app](https://freighter.app) |
 | Rust + Soroban CLI | Latest | [soroban.stellar.org](https://soroban.stellar.org) |
 
-</div>
 
 ### 🛠️ Setup
 
@@ -405,8 +410,6 @@ cd monitoring
 
 </div>
 
-**Total Documentation:** 64 files in `/docs` directory 📁
-
 ---
 
 ## 🤝 Contribution and Governance
@@ -437,7 +440,7 @@ cd monitoring
 - ✅ ESLint configured for code quality
 - ✅ Prettier for consistent formatting
 - ✅ Conventional commits for clear history
-- ✅ Comprehensive test coverage
+- ✅ Targeted integration test scripts and load-test utilities
 
 ---
 
@@ -453,13 +456,6 @@ cd monitoring
 | Date range queries | 1000ms | **15ms** | 🚀 **66x faster** |
 
 </div>
-
-### Database Statistics
-
-- **Tables:** 19
-- **Indexes:** 39 active
-- **Migrations:** 8 (all passing)
-- **Query Performance:** 40-66x improvement
 
 ---
 
@@ -484,22 +480,18 @@ cd monitoring
 
 | Security Feature | Status | Implementation |
 |-----------------|--------|----------------|
-| SEP-10 Authentication | ✅ | Challenge-based wallet auth |
-| Rate Limiting | ✅ | Strict (10/min) & Standard (100/min) |
-| Input Validation | ✅ | Zod schema validation |
-| SQL Injection Prevention | ✅ | Parameterized queries |
-| CORS Protection | ✅ | Whitelisted origins |
-| Security Headers | ✅ | HSTS, CSP, X-Frame-Options |
-| Data Encryption | ✅ | AES-256 for sensitive data |
-| Audit Logging | ✅ | All critical actions logged |
-| Idempotency Keys | ✅ | Prevent duplicate requests |
-| KYC Gate | ✅ | Middleware enforcement |
+| SEP-10 Authentication | ✅ | Challenge + signature verification with JWT issuance |
+| Rate Limiting | ✅ | Strict: 100/15m, Standard: 200/15m, Health: 500/min |
+| Input Validation | ✅ | `express-validator` + request sanitization middleware |
+| SQL Injection Prevention | ✅ | Parameterized queries across services/routes |
+| CORS Protection | ✅ | Origin restricted via `FRONTEND_URL` configuration |
+| Security Headers | ✅ | Helmet CSP/HSTS + custom anti-cache headers |
+| Data Encryption | ✅ | AES-256-CBC for sensitive PIN storage |
+| Audit Logging | ✅ | API request audit entries persisted to `audit_logs` |
+| Idempotency Keys | ✅ | Duplicate request replay protection middleware |
+| KYC Gate | ✅ | Operation-based KYC enforcement on payroll routes |
 
 </div>
-
-**Security Score:** 40/40 checks passed (100%) 🔒
-
-View complete checklist: [SECURITY_CHECKLIST.md](SECURITY_CHECKLIST.md)
 
 ---
 
@@ -543,13 +535,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <div align="center">
 
-**Version:** 1.0.0  
-**Last Updated:** 2026-04-30  
-**Status:** Active Development  
-**Network:** Stellar Testnet
-
----
-
 ### 📊 Project Statistics
 
 [![GitHub Stars](https://img.shields.io/github/stars/janvi100104/Lumenshake?style=flat-square&color=yellow)](https://github.com/janvi100104/LumenShake/stargazers)
@@ -559,7 +544,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 [![GitHub Contributors](https://img.shields.io/github/contributors/janvi100104/LumenShake?style=flat-square&color=purple)](https://github.com/janvi100104/LumenShake/graphs/contributors)
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/janvi100104/LumenShake?style=flat-square&color=green)](https://github.com/janvi100104/LumenShake/commits/main)
 
+</div>
+
 ---
+
+<div align="center">
 
 **Built with ❤️ on Stellar Network**
 

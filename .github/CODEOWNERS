@@ -1,0 +1,8 @@
+# Default owner for all files
+* @janvi100104
+
+# Module ownership
+/backend/ @janvi100104
+/web/ @janvi100104
+/contracts/ @janvi100104
+/monitoring/ @janvi100104
